@@ -1,0 +1,69 @@
+# --- Dependencies ---
+node_modules/
+.pnp
+.pnp.js
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+
+# --- Env / secrets ---
+.env
+.env.*
+!.env.example
+
+# --- Builds ---
+dist/
+build/
+out/
+*.tsbuildinfo
+coverage/
+
+# --- Backend / NestJS ---
+/apps/**/dist/
+
+# --- Web (Next.js / React) ---
+.next/
+.vercel/
+.turbo/
+
+# --- Mobile (React Native / Flutter / Expo) ---
+.expo/
+.expo-shared/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+android/app/build/
+ios/build/
+ios/Pods/
+*.ipa
+*.apk
+*.aab
+
+# --- Docker ---
+docker-compose.override.yml
+
+# --- Logs ---
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# --- Editors / OS ---
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+
+# --- Tests ---
+/coverage
+*.lcov
+
+# --- Misc ---
+*.pem
+*.sqlite
+tmp/
