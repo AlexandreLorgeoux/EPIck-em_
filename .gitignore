@@ -22,6 +22,7 @@ coverage/
 
 # --- Backend / NestJS ---
 /apps/**/dist/
+/apps/api/src/generated/
 
 # --- Web (Next.js / React) ---
 .next/
