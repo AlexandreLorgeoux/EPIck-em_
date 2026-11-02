@@ -39,6 +39,10 @@ jobs:
       - name: Install
         run: npm ci
 
+      # The client is generated (not committed) and imported by lint and tests
+      - name: Generate Prisma client
+        run: npm run db:generate -w apps/api
+
       - name: Lint
         run: npm run lint
 
