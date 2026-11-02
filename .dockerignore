@@ -2,6 +2,7 @@
 **/.next
 **/dist
 **/coverage
+**/src/generated
 .git
 .env
 .env.*
