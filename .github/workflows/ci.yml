@@ -17,6 +17,25 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
+    # e2e tests run against a real database; they create and migrate
+    # "<db>_test" from this URL themselves
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: epickem
+          POSTGRES_PASSWORD: epickem
+          POSTGRES_DB: epickem
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U epickem -d epickem"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://epickem:epickem@localhost:5432/epickem
+
     steps:
       - name: Checkout
         uses: actions/checkout@v5
