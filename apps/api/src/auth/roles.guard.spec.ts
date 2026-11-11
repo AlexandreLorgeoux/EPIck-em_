@@ -39,7 +39,7 @@ const contextFor = (
 
 const admin: AuthUser = { id: 'u1', role: 'admin' };
 const player: AuthUser = { id: 'u2', role: 'player' };
-const spectator: AuthUser = { id: 'u3', role: 'spectator' };
+const plainUser: AuthUser = { id: 'u3', role: 'user' };
 
 describe('RolesGuard', () => {
   const guard = new RolesGuard(new Reflector());
@@ -55,7 +55,7 @@ describe('RolesGuard', () => {
   });
 
   it('lets any signed-in user through a route without @Roles()', () => {
-    for (const user of [admin, player, spectator]) {
+    for (const user of [admin, player, plainUser]) {
       expect(
         guard.canActivate(contextFor(OpenController, 'signedIn', user)),
       ).toBe(true);
@@ -70,7 +70,7 @@ describe('RolesGuard', () => {
 
   it('rejects a role that is not listed with 403 and names the allowed roles', () => {
     const run = () =>
-      guard.canActivate(contextFor(AdminController, 'manage', spectator));
+      guard.canActivate(contextFor(AdminController, 'manage', plainUser));
     expect(run).toThrow(ForbiddenException);
     expect(run).toThrow('This action requires one of these roles: admin');
   });
@@ -80,7 +80,7 @@ describe('RolesGuard', () => {
       guard.canActivate(contextFor(AdminController, 'shared', player)),
     ).toBe(true);
     expect(() =>
-      guard.canActivate(contextFor(AdminController, 'shared', spectator)),
+      guard.canActivate(contextFor(AdminController, 'shared', plainUser)),
     ).toThrow(ForbiddenException);
   });
 });

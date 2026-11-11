@@ -3,7 +3,7 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import { PasswordService } from './password.service.js';
 
 // Creates the first admin from ADMIN_EMAIL and ADMIN_PASSWORD, since
-// self-registration only ever creates spectators. Does nothing once the
+// self-registration only ever creates plain users. Does nothing once the
 // account exists, so the variables can stay set.
 @Injectable()
 export class AdminBootstrapService implements OnApplicationBootstrap {

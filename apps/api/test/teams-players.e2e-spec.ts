@@ -74,7 +74,7 @@ describe('Teams and players API (e2e)', () => {
     cookies = {
       admin: (await signedInAs(app, 'admin')).cookie,
       player: (await signedInAs(app, 'player')).cookie,
-      spectator: (await signedInAs(app, 'spectator')).cookie,
+      user: (await signedInAs(app, 'user')).cookie,
     };
   });
 
@@ -107,9 +107,9 @@ describe('Teams and players API (e2e)', () => {
     );
 
     it.each(routes)(
-      '%s %s rejects spectators with 403',
+      '%s %s rejects plain users with 403',
       async (method, url) => {
-        await as('spectator')[method](url).expect(403);
+        await as('user')[method](url).expect(403);
       },
     );
 

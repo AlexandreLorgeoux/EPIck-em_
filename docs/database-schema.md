@@ -72,7 +72,7 @@ erDiagram
     uuid id PK
     text email UK
     text display_name
-    enum role "admin, player, spectator"
+    enum role "admin, player, user"
     bool is_synthetic
     text password_hash "argon2id, null if no sign-in"
   }
