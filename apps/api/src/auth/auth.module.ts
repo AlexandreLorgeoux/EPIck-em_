@@ -1,5 +1,6 @@
 import { Global, Module } from '@nestjs/common';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { AdminBootstrapService } from './admin-bootstrap.service.js';
 import { AuthController } from './auth.controller.js';
 import { AuthService } from './auth.service.js';
 import { PasswordService } from './password.service.js';
@@ -16,7 +17,12 @@ import { TokenService } from './token.service.js';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, PasswordService, TokenService],
+  providers: [
+    AuthService,
+    PasswordService,
+    TokenService,
+    AdminBootstrapService,
+  ],
   exports: [AuthService, TokenService],
 })
 export class AuthModule {}
