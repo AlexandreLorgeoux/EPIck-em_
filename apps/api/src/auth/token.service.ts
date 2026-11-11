@@ -5,7 +5,7 @@ import type { UserRole } from '../generated/prisma/enums.js';
 import { ACCESS_TOKEN_TTL_SECONDS, authSecret } from './auth.config.js';
 import type { AuthUser } from './auth-user.js';
 
-const ROLES: readonly string[] = ['admin', 'player', 'spectator'];
+const ROLES: readonly string[] = ['admin', 'player', 'user'];
 
 @Injectable()
 export class TokenService {

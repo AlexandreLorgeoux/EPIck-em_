@@ -23,7 +23,7 @@ type PublicUser = {
   id: string;
   email: string;
   displayName: string;
-  role: 'admin' | 'player' | 'spectator';
+  role: 'admin' | 'player' | 'user';
   createdAt: Date;
 };
 
@@ -44,7 +44,7 @@ export class AuthService {
     private readonly tokens: TokenService,
   ) {}
 
-  // Self-registration always creates a spectator: roles are granted by an admin
+  // Self-registration always creates a plain user: roles are granted by an admin
   async register(dto: RegisterDto, userAgent?: string): Promise<SignedIn> {
     const existing = await this.prisma.user.findUnique({
       where: { email: dto.email },

@@ -43,14 +43,14 @@ describe('Authentication and roles (e2e)', () => {
   });
 
   describe('registration', () => {
-    it('creates a spectator and signs them in with httpOnly cookies', async () => {
+    it('creates a plain user and signs them in with httpOnly cookies', async () => {
       const res = await register(account()).expect(201);
 
       expect(res.body).toEqual({
         id: expect.any(String),
         email: 'zywoo@example.test',
         displayName: 'Zywoo',
-        role: 'spectator',
+        role: 'user',
         createdAt: expect.any(String),
       });
       const cookies = setCookies(res);
@@ -113,7 +113,7 @@ describe('Authentication and roles (e2e)', () => {
       const me = await agent.get('/auth/me').expect(200);
       expect(me.body).toMatchObject({
         email: 'zywoo@example.test',
-        role: 'spectator',
+        role: 'user',
       });
     });
 
@@ -216,9 +216,9 @@ describe('Authentication and roles (e2e)', () => {
     );
 
     it.each(routes)(
-      '%s %s rejects spectators and players with 403',
+      '%s %s rejects plain users and players with 403',
       async (method, url) => {
-        for (const role of ['spectator', 'player'] as const) {
+        for (const role of ['user', 'player'] as const) {
           const { cookie } = await signedInAs(app, role);
           await request(server())
             [method](url)
@@ -250,7 +250,7 @@ describe('Authentication and roles (e2e)', () => {
         .expect(200);
       expect(res.body.role).toBe('player');
 
-      // The old session carried the spectator role: it must sign in again
+      // The old session carried the user role: it must sign in again
       await agent.post('/auth/refresh').expect(401);
       const login = request.agent(server());
       await login
@@ -265,7 +265,7 @@ describe('Authentication and roles (e2e)', () => {
       const res = await request(server())
         .patch(`/users/${admin.user.id}/role`)
         .set('Cookie', admin.cookie)
-        .send({ role: 'spectator' })
+        .send({ role: 'user' })
         .expect(400);
       expect(res.body.message).toBe(
         'You cannot change your own role: ask another admin',
@@ -279,7 +279,7 @@ describe('Authentication and roles (e2e)', () => {
         .send({ role: 'superadmin' })
         .expect(400);
       expect(bad.body.message).toEqual([
-        'role must be one of: admin, player, spectator',
+        'role must be one of: admin, player, user',
       ]);
       await request(server())
         .patch(`/users/${UNKNOWN_ID}/role`)
