@@ -1,6 +1,6 @@
 # Database schema
 
-What is actually implemented in PostgreSQL today. The full target design, with every table and the reasons behind it, is in [data-model.md](./data-model.md). This page covers the sprint 2 slice (ticket #19): tournaments, teams, players, registrations, matches and results, with the derived bracket state.
+What is actually implemented in PostgreSQL today. The full target design, with every table and the reasons behind it, is in [data-model.md](./data-model.md). This page covers the sprint 2 slice: tournaments, teams, players, registrations, matches and results, with the derived bracket state (ticket #19), plus sign-in sessions (ticket #9).
 
 - Source of truth: `apps/api/prisma/schema.prisma`
 - Migrations: `apps/api/prisma/migrations/`
@@ -11,6 +11,7 @@ What is actually implemented in PostgreSQL today. The full target design, with e
 erDiagram
   game ||--o{ tournament : "is played in"
   user ||--o{ tournament : owns
+  user ||--o{ session : "signs in with"
   tournament |o--o{ tournament : "duplicated from"
   tournament ||--o{ stage : has
   tournament ||--o{ registration : has
@@ -60,12 +61,20 @@ erDiagram
     text name
     jsonb config "never secrets"
   }
+  session {
+    uuid id PK
+    uuid user_id FK
+    text token_hash UK "SHA-256 of the refresh token"
+    timestamptz expires_at
+    timestamptz revoked_at
+  }
   user {
     uuid id PK
     text email UK
     text display_name
     enum role "admin, player, spectator"
     bool is_synthetic
+    text password_hash "argon2id, null if no sign-in"
   }
   tournament {
     uuid id PK
@@ -177,6 +186,7 @@ Every table is one of the kinds defined in [data-model.md, section 3](./data-mod
 | Setup | `game`, `source`, `user`, `tournament`, `stage`, `team`, `player`, `team_member`, `match`, `match_slot` | The API, on organizer actions |
 | Raw | `registration`, `match_result`, `match_result_entrant`, `round`, `round_score` | The API, on result entry or import |
 | Derived | `slot_assignment`, `match_outcome` | The recalculation job only |
+| Sessions | `session` | The API, on sign-in, refresh and sign-out (outside the data model kinds) |
 
 A match slot says **where** its participant comes from (seed 3, winner of match 5). Who actually sits there is derived (`slot_assignment`), so correcting a result moves the bracket without touching the setup.
 
@@ -199,6 +209,14 @@ await prisma.$transaction(async (tx) => {
   // write slot_assignment and match_outcome here
 });
 ```
+
+## Sign-in sessions
+
+Signing in sets two httpOnly cookies. The **access token** is a signed JWT valid 15 minutes, checked without a database read. The **refresh token** is random, valid 7 days, and only its SHA-256 hash is stored in `session`, so a database leak does not expose usable tokens.
+
+- `POST /auth/refresh` replaces the refresh token: the old one stops working at once.
+- `POST /auth/logout` and a role change set `revoked_at`, so the session cannot be refreshed any more.
+- Passwords are stored as argon2id hashes in `user.password_hash`, never in clear.
 
 ## Not implemented yet
 
