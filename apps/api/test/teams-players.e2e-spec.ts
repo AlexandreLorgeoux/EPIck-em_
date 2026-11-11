@@ -1,8 +1,9 @@
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import type { App } from 'supertest/types.js';
+import type { UserRole } from '../src/generated/prisma/enums.js';
 import { PrismaService } from '../src/prisma/prisma.service.js';
-import { ROLE_HEADER, createTestApp, resetDatabase } from './test-app.js';
+import { createTestApp, resetDatabase, signedInAs } from './test-app.js';
 
 const UNKNOWN_ID = '0190a7c0-0000-7000-8000-000000000000';
 
@@ -10,15 +11,17 @@ describe('Teams and players API (e2e)', () => {
   let app: INestApplication<App>;
   let prisma: PrismaService;
 
-  const as = (role: string) => ({
+  // Cookie header of a signed-in user per role, recreated after each reset
+  let cookies: Record<UserRole, string>;
+  const as = (role: UserRole) => ({
     get: (url: string) =>
-      request(app.getHttpServer()).get(url).set(ROLE_HEADER, role),
+      request(app.getHttpServer()).get(url).set('Cookie', cookies[role]),
     post: (url: string) =>
-      request(app.getHttpServer()).post(url).set(ROLE_HEADER, role),
+      request(app.getHttpServer()).post(url).set('Cookie', cookies[role]),
     patch: (url: string) =>
-      request(app.getHttpServer()).patch(url).set(ROLE_HEADER, role),
+      request(app.getHttpServer()).patch(url).set('Cookie', cookies[role]),
     delete: (url: string) =>
-      request(app.getHttpServer()).delete(url).set(ROLE_HEADER, role),
+      request(app.getHttpServer()).delete(url).set('Cookie', cookies[role]),
   });
   const admin = () => as('admin');
 
@@ -68,6 +71,11 @@ describe('Teams and players API (e2e)', () => {
 
   beforeEach(async () => {
     await resetDatabase(prisma);
+    cookies = {
+      admin: (await signedInAs(app, 'admin')).cookie,
+      player: (await signedInAs(app, 'player')).cookie,
+      spectator: (await signedInAs(app, 'spectator')).cookie,
+    };
   });
 
   afterAll(async () => {
