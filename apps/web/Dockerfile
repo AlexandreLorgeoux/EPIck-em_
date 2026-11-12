@@ -9,6 +9,9 @@ RUN npm ci -w apps/web
 FROM node:24-alpine AS build
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
+# Where the /api proxy forwards to (next.config.ts), fixed at build time
+ARG API_URL=http://api:4000
+ENV API_URL=$API_URL
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build -w apps/web
