@@ -89,6 +89,11 @@ describe('Authentication and roles (e2e)', () => {
         displayName: 'Z',
         password: 'short',
       }).expect(400);
+      expect(res.body.errors).toEqual({
+        email: ['email must be a valid email address'],
+        displayName: ['displayName must be between 2 and 32 characters'],
+        password: ['password must be between 8 and 128 characters'],
+      });
       expect(res.body.message).toEqual(
         expect.arrayContaining([
           'email must be a valid email address',
