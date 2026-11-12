@@ -3,6 +3,7 @@ import cookieParser from 'cookie-parser';
 import type { Express } from 'express';
 import { authenticate } from './auth/authenticate.middleware.js';
 import { TokenService } from './auth/token.service.js';
+import { validationException } from './common/validation-errors.js';
 
 // Shared by main.ts and the e2e tests, so tests run the real configuration
 export function configureApp(app: INestApplication) {
@@ -23,6 +24,7 @@ export function configureApp(app: INestApplication) {
       whitelist: true,
       forbidNonWhitelisted: true,
       transform: true,
+      exceptionFactory: validationException,
     }),
   );
   app.enableShutdownHooks();
