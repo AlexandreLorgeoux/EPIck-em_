@@ -58,6 +58,9 @@ services:
     build:
       context: .
       dockerfile: apps/web/Dockerfile
+    environment:
+      # Server components call the API directly, inside the Docker network
+      API_URL: http://api:4000
     ports:
       - "3000:3000"
     depends_on:
