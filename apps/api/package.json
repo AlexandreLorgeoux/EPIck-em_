@@ -22,7 +22,8 @@
     "test:watch": "NODE_OPTIONS=\"--experimental-vm-modules --no-warnings=ExperimentalWarning\" jest --watch",
     "test:cov": "NODE_OPTIONS=\"--experimental-vm-modules --no-warnings=ExperimentalWarning\" jest --coverage",
     "test:debug": "NODE_OPTIONS=--experimental-vm-modules node --inspect-brk ../../node_modules/jest/bin/jest.js --runInBand",
-    "test:e2e": "vitest run --config ./vitest.config.e2e.ts"
+    "test:e2e": "vitest run --config ./vitest.config.e2e.ts",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
     "@nestjs/common": "^12.0.1",
