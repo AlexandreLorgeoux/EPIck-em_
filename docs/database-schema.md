@@ -82,6 +82,8 @@ erDiagram
     uuid owner_user_id FK
     text slug UK
     enum lifecycle "draft, published, archived"
+    timestamptz starts_at
+    timestamptz ends_at
     enum visibility
     enum registration_mode
     enum origin "internal, imported"
@@ -209,6 +211,10 @@ await prisma.$transaction(async (tx) => {
   // write slot_assignment and match_outcome here
 });
 ```
+
+## Tournament status
+
+The API shows a `status` of `draft`, `running` or `finished`, but only `lifecycle` is stored: `draft` is a draft, `published` is running until every match has a decided `match_outcome`, then finished, and `archived` is finished. Only a draft can be edited or deleted (ticket #21).
 
 ## Sign-in sessions
 

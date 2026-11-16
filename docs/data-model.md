@@ -444,6 +444,7 @@ Conventions:
 | slug | text | Unique, for URLs. |
 | lifecycle | enum | `draft`, `published`, `archived`. Whether it is live or finished is **derived** from matches, not stored. |
 | starts_at | timestamptz | Planned start. |
+| ends_at | timestamptz | Planned end, for display. Whether the tournament is over is derived from its matches, not from this date. |
 | timezone | text | IANA time zone used for display. |
 | description | text | Presentation text. |
 | rules_text | text | The tournament rules (*règlement*). |
