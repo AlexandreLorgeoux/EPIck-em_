@@ -9,6 +9,7 @@ import { api } from "@/lib/api/client";
 import {
   AuthProvider,
   SESSION_EXPIRED_MESSAGE,
+  useAuth,
 } from "@/lib/auth/auth-provider";
 import { fakeApi, signedOut, user } from "@/test/fake-api";
 import { LoginForm } from "./login-form";
@@ -20,10 +21,19 @@ const signedOutApi = (login: [number, unknown]) =>
     "POST /auth/login": login,
   });
 
+// Shows who the provider thinks is signed in, so a test can wait for it
+function SignedInAs() {
+  const { loading, user: current } = useAuth();
+  return (
+    <p data-testid="signed-in-as">{loading ? "" : (current?.email ?? "")}</p>
+  );
+}
+
 function renderLogin() {
   render(
     <AuthProvider>
       <LoginForm />
+      <SignedInAs />
     </AuthProvider>,
   );
   return userEvent.setup();
@@ -104,8 +114,11 @@ describe("LoginForm", () => {
   it("moves focus to the heading and explains when the session expired", async () => {
     const fake = fakeApi({ "GET /auth/me": [200, user] });
     renderLogin();
-    await waitFor(() => expect(fake.count("GET /auth/me")).toBe(1));
-    await act(async () => {}); // let the signed-in user settle
+    // Wait until the provider has the user, not just until /auth/me was
+    // sent: on a slow machine the response can land after the 401 below
+    await waitFor(() =>
+      expect(screen.getByTestId("signed-in-as").textContent).toBe(user.email),
+    );
     fake.set("GET /teams", [401, signedOut]);
     fake.set("POST /auth/refresh", [401, signedOut]);
 
