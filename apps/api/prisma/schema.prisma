@@ -240,6 +240,8 @@ model Tournament {
   // Live or finished is derived from matches, not stored
   lifecycle          TournamentLifecycle  @default(draft)
   startsAt           DateTime?            @map("starts_at") @db.Timestamptz(6)
+  // Planned end, for display; whether it is over is derived from its matches
+  endsAt             DateTime?            @map("ends_at") @db.Timestamptz(6)
   timezone           String               @default("Europe/Paris")
   description        String?
   rulesText          String?              @map("rules_text")
