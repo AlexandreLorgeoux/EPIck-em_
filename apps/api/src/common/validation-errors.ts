@@ -29,3 +29,13 @@ export const validationException = (errors: ValidationError[]) => {
     errors: byField,
   });
 };
+
+// A 400 about one field, found by a service rather than by the DTO, with
+// the same body as validation errors so forms handle both the same way
+export const fieldException = (field: string, message: string) =>
+  new BadRequestException({
+    statusCode: 400,
+    error: 'Bad Request',
+    message: [message],
+    errors: { [field]: [message] },
+  });
