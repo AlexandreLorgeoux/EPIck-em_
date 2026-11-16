@@ -61,6 +61,8 @@ services:
     environment:
       # Server components call the API directly, inside the Docker network
       API_URL: http://api:4000
+      # Verifies session tokens before protected pages render (src/proxy.ts)
+      AUTH_SECRET: ${AUTH_SECRET}
     ports:
       - "3000:3000"
     depends_on:
