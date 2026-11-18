@@ -6,6 +6,7 @@ import {
 import { randomInt } from 'node:crypto';
 import type { AuthUser } from '../auth/auth-user.js';
 import { fieldException } from '../common/validation-errors.js';
+import { matchScore, type RoundScores } from '../engine/result.js';
 import { planSingleElimination } from '../engine/single-elimination.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { BracketRecomputeService } from './bracket-recompute.service.js';
@@ -113,7 +114,20 @@ export class BracketService {
         matches: {
           orderBy: [{ bracketRound: 'asc' }, { position: 'asc' }],
           include: {
-            outcome: true,
+            outcome: {
+              include: {
+                result: {
+                  select: {
+                    rounds: {
+                      orderBy: { number: 'asc' },
+                      select: {
+                        scores: { select: { slotPosition: true, score: true } },
+                      },
+                    },
+                  },
+                },
+              },
+            },
             slots: {
               orderBy: { position: 'asc' },
               include: {
@@ -140,6 +154,19 @@ export class BracketService {
     const rounds = new Map<number, unknown[]>();
     for (const match of stage.matches) {
       const winner = match.outcome?.winnerRegistrationId ?? null;
+      const result = match.outcome?.result;
+      const score = result
+        ? matchScore(
+            result.rounds.map(
+              (round): RoundScores =>
+                [1, 2].map(
+                  (slot) =>
+                    round.scores.find((s) => s.slotPosition === slot)?.score ??
+                    0,
+                ) as [number, number],
+            ),
+          )
+        : null;
       const list = rounds.get(match.bracketRound) ?? [];
       list.push({
         id: match.id,
@@ -153,6 +180,7 @@ export class BracketService {
             state: slot.assignment?.state ?? 'open',
             seed: registration?.seed ?? null,
             team: registration?.team ?? null,
+            score: score ? score[slot.position - 1] : null,
             winner: Boolean(
               winner && slot.assignment?.registrationId === winner,
             ),
