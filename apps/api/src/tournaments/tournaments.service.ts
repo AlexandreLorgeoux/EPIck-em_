@@ -144,20 +144,8 @@ export class TournamentsService {
     ]);
   }
 
-  // Draft to running: the tournament becomes public and can no longer be
-  // edited or deleted
-  async start(id: string) {
-    await this.getDraft(id, 'started');
-    const row = await this.prisma.tournament.update({
-      where: { id },
-      data: { lifecycle: 'published' },
-      include: withRelations,
-    });
-    return toResponse(row);
-  }
-
-  // The tournament, if it is still a draft. Editing, deleting and changing
-  // the teams are only allowed then.
+  // The tournament, if it is still a draft. Editing, deleting, changing the
+  // teams and generating the bracket are only allowed then.
   async getDraft(id: string, action: string) {
     const row = await this.prisma.tournament.findUnique({ where: { id } });
     if (!row) throw new NotFoundException(`No tournament ${id}`);

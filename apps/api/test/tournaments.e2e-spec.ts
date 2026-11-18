@@ -35,9 +35,20 @@ describe('Tournament API (e2e)', () => {
         .expect(201)
     ).body as Tournament;
 
+  // Two teams in, bracket generated: the tournament is running
   const started = async (body: object = {}) => {
     const t = await create(body);
-    await admin().post(`/tournaments/${t.id}/start`).expect(200);
+    for (const name of ['Alpha', 'Bravo']) {
+      const team = await prisma.team.create({ data: { name } });
+      await admin()
+        .post(`/tournaments/${t.id}/teams`)
+        .send({ teamId: team.id })
+        .expect(201);
+    }
+    await admin()
+      .post(`/tournaments/${t.id}/bracket`)
+      .send({ seeding: 'auto' })
+      .expect(201);
     return t;
   };
 
@@ -45,21 +56,12 @@ describe('Tournament API (e2e)', () => {
   // recalculation job writes derived rows
   const finished = async () => {
     const t = await started({ name: 'Finished Cup' });
-    const stage = await prisma.stage.create({
-      data: {
-        tournamentId: t.id,
-        position: 1,
-        name: 'Main',
-        format: 'single_elim',
-      },
-    });
-    const match = await prisma.match.create({
-      data: { stageId: stage.id, bracketRound: 1, position: 1, label: 'Final' },
-    });
+    // Two teams make a single match: the final
     await prisma.$transaction([
       prisma.$executeRaw`SELECT set_config('app.recompute', 'on', true)`,
-      prisma.matchOutcome.create({
-        data: { matchId: match.id, state: 'decided' },
+      prisma.matchOutcome.updateMany({
+        where: { match: { stage: { tournamentId: t.id } } },
+        data: { state: 'decided' },
       }),
     ]);
     return t;
@@ -87,7 +89,7 @@ describe('Tournament API (e2e)', () => {
       ['post', '/tournaments'],
       ['patch', `/tournaments/${UNKNOWN_ID}`],
       ['delete', `/tournaments/${UNKNOWN_ID}`],
-      ['post', `/tournaments/${UNKNOWN_ID}/start`],
+      ['post', `/tournaments/${UNKNOWN_ID}/bracket`],
     ];
 
     it.each(adminRoutes)(
@@ -250,13 +252,12 @@ describe('Tournament API (e2e)', () => {
   });
 
   describe('per status', () => {
-    it('is running once started, and finished when every match is decided', async () => {
+    it('is running once its bracket is generated, and finished when every match is decided', async () => {
       const draft = await create();
       expect(draft.status).toBe('draft');
-      const run = await admin()
-        .post(`/tournaments/${draft.id}/start`)
-        .expect(200);
-      expect(run.body.status).toBe('running');
+      const run = await started({ name: 'Running Cup' });
+      const running = await admin().get(`/tournaments/${run.id}`).expect(200);
+      expect(running.body.status).toBe('running');
       const done = await finished();
       const res = await admin().get(`/tournaments/${done.id}`).expect(200);
       expect(res.body.status).toBe('finished');
@@ -304,7 +305,7 @@ describe('Tournament API (e2e)', () => {
       ['running', started],
       ['finished', finished],
     ] as const)(
-      'refuses to edit, delete or restart a %s tournament',
+      'refuses to edit, delete or regenerate a %s tournament',
       async (status, make) => {
         const t = await make();
         const edit = await admin()
@@ -318,7 +319,10 @@ describe('Tournament API (e2e)', () => {
         expect(del.body.message).toBe(
           `This tournament is ${status}: only a draft tournament can be deleted`,
         );
-        await admin().post(`/tournaments/${t.id}/start`).expect(409);
+        await admin()
+          .post(`/tournaments/${t.id}/bracket`)
+          .send({ seeding: 'auto' })
+          .expect(409);
         await admin().get(`/tournaments/${t.id}`).expect(200);
       },
     );
