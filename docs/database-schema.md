@@ -216,6 +216,16 @@ await prisma.$transaction(async (tx) => {
 
 The API shows a `status` of `draft`, `running` or `finished`, but only `lifecycle` is stored: `draft` is a draft, `published` is running until every match has a decided `match_outcome`, then finished, and `archived` is finished. Only a draft can be edited or deleted (ticket #21).
 
+## Bracket generation
+
+`POST /tournaments/:id/bracket` (ticket #23) builds a single-elimination bracket from the tournament's teams and starts the tournament, in one transaction:
+
+1. Seeds go to `registration.seed`: the order set with `PUT /tournaments/:id/seeding` (manual), or a random draw (auto).
+2. One `stage` (`single_elim`), one `match` per bracket match, and two `match_slot` rows per match saying where each participant comes from: a seed, a bye, or the winner of an earlier match.
+3. The engine (`apps/api/src/engine`) computes layer 1 of the cascade, and the derived `slot_assignment` and `match_outcome` rows are written with `app.recompute` on. A team facing a bye is already through to the next round.
+
+The best seeds meet as late as possible (1 plays 8, 4 plays 5...), and byes go to the top seeds when the number of teams is not a power of two.
+
 ## Sign-in sessions
 
 Signing in sets two httpOnly cookies. The **access token** is a signed JWT valid 15 minutes, checked without a database read. The **refresh token** is random, valid 7 days, and only its SHA-256 hash is stored in `session`, so a database leak does not expose usable tokens.
