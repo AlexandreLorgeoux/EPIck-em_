@@ -59,11 +59,4 @@ export class TournamentsController {
   remove(@Param('id', uuidParam()) id: string) {
     return this.tournaments.remove(id);
   }
-
-  @Roles('admin')
-  @Post(':id/start')
-  @HttpCode(200)
-  start(@Param('id', uuidParam()) id: string) {
-    return this.tournaments.start(id);
-  }
 }
