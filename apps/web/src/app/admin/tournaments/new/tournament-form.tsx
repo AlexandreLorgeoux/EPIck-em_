@@ -90,7 +90,7 @@ export function TournamentForm() {
   }
 
   return (
-    <main className="mx-auto flex max-w-xl flex-col gap-6 px-4 py-16">
+    <div className="mx-auto flex max-w-xl flex-col gap-6 px-4 py-16">
       <Link
         href={routes.admin.tournaments}
         className="underline underline-offset-4"
@@ -157,6 +157,6 @@ export function TournamentForm() {
           {pending ? "Création…" : "Créer le tournoi"}
         </button>
       </form>
-    </main>
+    </div>
   );
 }
