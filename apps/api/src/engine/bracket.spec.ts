@@ -96,6 +96,20 @@ describe('computeBracket', () => {
     expect(outcomes.get('r2m1')?.state).toBe('pending');
   });
 
+  it('stops a conflicting result from moving anyone forward', () => {
+    const { slots, outcomes } = computeBracket(
+      planSingleElimination(4),
+      seeds(4),
+      new Map([['r1m1', 'conflict' as const]]),
+    );
+    expect(outcomes.get('r1m1')).toEqual({
+      state: 'conflict',
+      winner: null,
+      loser: null,
+    });
+    expect(slots.get(slotKey('r2m1', 1))?.state).toBe('open');
+  });
+
   it('gives the same result for the same input, whatever the plan order', () => {
     const plan = planSingleElimination(6);
     const winners = new Map([['r1m2', 1 as const]]);
