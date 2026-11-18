@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { BracketRecomputeService } from './bracket-recompute.service.js';
 import { BracketController } from './bracket.controller.js';
 import { BracketService } from './bracket.service.js';
 import { TournamentTeamsController } from './tournament-teams.controller.js';
@@ -12,6 +13,11 @@ import { TournamentsService } from './tournaments.service.js';
     TournamentTeamsController,
     BracketController,
   ],
-  providers: [TournamentsService, TournamentTeamsService, BracketService],
+  providers: [
+    TournamentsService,
+    TournamentTeamsService,
+    BracketService,
+    BracketRecomputeService,
+  ],
 })
 export class TournamentsModule {}

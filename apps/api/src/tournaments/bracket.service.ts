@@ -6,9 +6,9 @@ import {
 import { randomInt } from 'node:crypto';
 import type { AuthUser } from '../auth/auth-user.js';
 import { fieldException } from '../common/validation-errors.js';
-import { computeBracket, slotKey } from '../engine/bracket.js';
 import { planSingleElimination } from '../engine/single-elimination.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { BracketRecomputeService } from './bracket-recompute.service.js';
 import { GenerateBracketDto } from './dto/generate-bracket.dto.js';
 import { ACTIVE_REGISTRATION } from './tournament-teams.service.js';
 import { TournamentsService } from './tournaments.service.js';
@@ -29,6 +29,7 @@ export class BracketService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly tournaments: TournamentsService,
+    private readonly recompute: BracketRecomputeService,
   ) {}
 
   // Builds the single-elimination bracket and starts the tournament, in
@@ -51,7 +52,6 @@ export class BracketService {
 
     const plan = planSingleElimination(ordered.length);
     const bySeed = new Map(ordered.map((r, i) => [i + 1, r.id]));
-    const state = computeBracket(plan, bySeed);
 
     await this.prisma.$transaction(async (tx) => {
       for (const [seed, id] of bySeed) {
@@ -78,7 +78,7 @@ export class BracketService {
       const matchId = new Map(
         matches.map((m) => [`r${m.bracketRound}m${m.position}`, m.id]),
       );
-      const slots = await tx.matchSlot.createManyAndReturn({
+      await tx.matchSlot.createMany({
         data: plan.flatMap((m) =>
           m.slots.map((feeder, i) => ({
             matchId: matchId.get(m.key)!,
@@ -92,36 +92,9 @@ export class BracketService {
               feeder.kind === 'winner' ? matchId.get(feeder.match)! : null,
           })),
         ),
-        select: { id: true, matchId: true, position: true },
       });
-
-      // Derived rows: only writable inside a recalculation (see the
-      // migration triggers). This is the first run of the cascade.
-      await tx.$executeRaw`SELECT set_config('app.recompute', 'on', true)`;
-      const keyOf = new Map([...matchId].map(([key, id]) => [id, key]));
-      await tx.slotAssignment.createMany({
-        data: slots.map((slot) => {
-          const key = slotKey(keyOf.get(slot.matchId)!, slot.position as 1 | 2);
-          const view = state.slots.get(key)!;
-          return {
-            matchSlotId: slot.id,
-            registrationId: view.participant,
-            state: view.state,
-            resolvedFrom: view.resolvedFrom,
-          };
-        }),
-      });
-      await tx.matchOutcome.createMany({
-        data: plan.map((m) => {
-          const outcome = state.outcomes.get(m.key)!;
-          return {
-            matchId: matchId.get(m.key)!,
-            state: outcome.state,
-            winnerRegistrationId: outcome.winner,
-            loserRegistrationId: outcome.loser,
-          };
-        }),
-      });
+      // First run of layer 1: places the seeds and sends byes through
+      await this.recompute.recompute(tx, tournamentId);
 
       await tx.tournament.update({
         where: { id: tournamentId },
