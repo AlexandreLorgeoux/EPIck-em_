@@ -1,7 +1,7 @@
 import type { PlannedMatch } from './single-elimination.js';
 
 // Layer 1 of the cascade (docs/data-model.md, section 6): from the bracket
-// plan, the seeds and the winners decided so far, who sits in every slot
+// plan, the seeds and the results entered so far, who sits in every slot
 // and how every match stands. Pure: same input, same output.
 
 export type SlotState = 'open' | 'assigned' | 'bye';
@@ -13,7 +13,8 @@ export interface SlotView {
 }
 
 export interface OutcomeView {
-  state: 'pending' | 'decided';
+  // conflict: the result contradicts itself, nobody goes through
+  state: 'pending' | 'decided' | 'conflict';
   winner: string | null;
   loser: string | null;
 }
@@ -30,8 +31,8 @@ export function computeBracket(
   plan: PlannedMatch[],
   // Participant of each seed
   seeds: ReadonlyMap<number, string>,
-  // Winning slot of each played match
-  winners: ReadonlyMap<string, 1 | 2> = new Map(),
+  // What the current result of each played match says (see resultWinner)
+  results: ReadonlyMap<string, 1 | 2 | 'conflict'> = new Map(),
 ): BracketState {
   const slots = new Map<string, SlotView>();
   const outcomes = new Map<string, OutcomeView>();
@@ -60,14 +61,14 @@ export function computeBracket(
     views.forEach((view, i) =>
       slots.set(slotKey(match.key, (i + 1) as 1 | 2), view),
     );
-    outcomes.set(match.key, decide(views, winners.get(match.key)));
+    outcomes.set(match.key, decide(views, results.get(match.key)));
   }
   return { slots, outcomes };
 }
 
 function decide(
   [first, second]: [SlotView, SlotView],
-  winningSlot: 1 | 2 | undefined,
+  result: 1 | 2 | 'conflict' | undefined,
 ): OutcomeView {
   // A bye: the participant facing nobody goes through without playing
   if (first.state === 'bye' || second.state === 'bye') {
@@ -76,18 +77,17 @@ function decide(
       ? { state: 'decided', winner: through.participant, loser: null }
       : { state: 'pending', winner: null, loser: null };
   }
-  if (
-    winningSlot &&
-    first.state === 'assigned' &&
-    second.state === 'assigned'
-  ) {
-    const [winner, loser] =
-      winningSlot === 1 ? [first, second] : [second, first];
-    return {
-      state: 'decided',
-      winner: winner.participant,
-      loser: loser.participant,
-    };
+  // A result only counts once both participants are known
+  if (!result || first.state !== 'assigned' || second.state !== 'assigned') {
+    return { state: 'pending', winner: null, loser: null };
   }
-  return { state: 'pending', winner: null, loser: null };
+  if (result === 'conflict') {
+    return { state: 'conflict', winner: null, loser: null };
+  }
+  const [winner, loser] = result === 1 ? [first, second] : [second, first];
+  return {
+    state: 'decided',
+    winner: winner.participant,
+    loser: loser.participant,
+  };
 }
