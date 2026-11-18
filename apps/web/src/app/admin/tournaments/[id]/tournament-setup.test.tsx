@@ -44,8 +44,8 @@ function setup(inTournament: TournamentTeam[], tournament = draft) {
     "GET /tournaments/t1/teams": [200, inTournament],
     "GET /teams": [200, teamsOf("Alpha", "Bravo", "Charlie", "Delta")],
   });
-  render(<TournamentSetup id="t1" />);
-  return { fake, ui: userEvent.setup() };
+  const view = render(<TournamentSetup id="t1" />);
+  return { fake, ui: userEvent.setup(), ...view };
 }
 
 const listed = () =>
@@ -208,7 +208,7 @@ describe("TournamentSetup", () => {
       screen.getByRole("button", { name: "Confirmer la génération" }),
     );
     expect((await screen.findByRole("alert")).textContent).toBe(
-      "This tournament is running: only a draft tournament can be started",
+      "Ce tournoi est en cours : seul un brouillon peut encore changer.",
     );
   });
 
