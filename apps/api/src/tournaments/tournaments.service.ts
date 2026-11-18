@@ -156,7 +156,9 @@ export class TournamentsService {
     return toResponse(row);
   }
 
-  private async getDraft(id: string, action: string) {
+  // The tournament, if it is still a draft. Editing, deleting and changing
+  // the teams are only allowed then.
+  async getDraft(id: string, action: string) {
     const row = await this.prisma.tournament.findUnique({ where: { id } });
     if (!row) throw new NotFoundException(`No tournament ${id}`);
     const progress = await this.matchProgress([id]);
