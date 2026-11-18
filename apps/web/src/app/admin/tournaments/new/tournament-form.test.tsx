@@ -59,10 +59,13 @@ describe("TournamentForm", () => {
     await waitFor(() => expect(document.activeElement).toBe(name));
     expect(name.getAttribute("aria-invalid")).toBe("true");
     expect(name.getAttribute("aria-describedby")).toContain("-error");
+    // In French, with how to fix it
+    expect(screen.getByText(/«Nom» doit faire/).textContent).toBe(
+      "⚠ «Nom» doit faire entre 3 et 80 caractères. Tu en as saisi 2 : ajoute au moins 1 caractère.",
+    );
     expect(
-      screen.getByText("name must be between 3 and 80 characters"),
+      screen.getByText(/«Fin prévue» doit être après «Début»/),
     ).toBeTruthy();
-    expect(screen.getByText("endsAt must be after startsAt")).toBeTruthy();
     expect(
       screen.getByLabelText("Jeu").getAttribute("aria-invalid"),
     ).toBeNull();

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { api } from "@/lib/api/client";
 import { isApiError } from "@/lib/api/errors";
+import { explainMessage } from "@/lib/forms/explain";
 import type {
   SeedingMode,
   Team,
@@ -15,7 +16,7 @@ import { StatusBadge, formatDate } from "../tournament-status";
 
 const messageOf = (caught: unknown) =>
   isApiError(caught)
-    ? caught.message
+    ? explainMessage(caught.message)
     : "L'action a échoué. Réessaie dans un instant.";
 
 const button =
