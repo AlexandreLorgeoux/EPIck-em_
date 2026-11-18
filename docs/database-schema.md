@@ -226,6 +226,18 @@ The API shows a `status` of `draft`, `running` or `finished`, but only `lifecycl
 
 The best seeds meet as late as possible (1 plays 8, 4 plays 5...), and byes go to the top seeds when the number of teams is not a power of two.
 
+## Match results
+
+`POST /matches/:id/result` (ticket #24), admin only, takes `{ "scores": [3, 1], "winnerSlot": 1 }`, scores in slot order. In one transaction:
+
+1. Checks that both teams are known, the match is not a bye and has no result yet, the score is not a tie and the winner has the higher score.
+2. Saves the raw result: `match_result` version 1 with `declared_winner_slot` and `reported_by`, the two teams in `match_result_entrant`, and the score as one `round` with its `round_score` rows. These tables are append-only: a correction will be version 2, with a reason.
+3. Runs layer 1 again for the whole tournament and replaces its `slot_assignment` and `match_outcome` rows, so the winner fills the next match.
+
+A PostgreSQL advisory lock on the tournament serializes these writes: two results entered at the same time for one match give one `201` and one `409`.
+
+Layer 1 runs inside the request for now, because the bracket is small and nothing else depends on it yet. It moves to the recompute job (section 7 of the data model) with the outbox tables. When the final has a result, every match is decided and the tournament status becomes `finished`.
+
 ## Sign-in sessions
 
 Signing in sets two httpOnly cookies. The **access token** is a signed JWT valid 15 minutes, checked without a database read. The **refresh token** is random, valid 7 days, and only its SHA-256 hash is stored in `session`, so a database leak does not expose usable tokens.
