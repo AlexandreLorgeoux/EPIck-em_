@@ -41,3 +41,28 @@ export interface Team {
   captainPlayerId: string | null;
   members: TeamMember[];
 }
+
+export type TournamentStatus = "draft" | "running" | "finished";
+
+export interface Tournament {
+  id: string;
+  slug: string;
+  name: string;
+  game: { id: string; name: string };
+  description: string | null;
+  startsAt: string | null;
+  endsAt: string | null;
+  timezone: string;
+  status: TournamentStatus;
+  owner: { id: string; displayName: string };
+}
+
+// A team taking part in a tournament, with its seed once set
+export interface TournamentTeam {
+  id: string;
+  name: string;
+  tag: string | null;
+  seed: number | null;
+}
+
+export type SeedingMode = "manual" | "auto";
