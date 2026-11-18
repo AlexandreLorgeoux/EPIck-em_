@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it } from "@jest/globals";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { Player } from "@/lib/api/models";
+import { expectNoAxeViolations } from "@/test/axe";
 import { fakeApi } from "@/test/fake-api";
 import { PlayerEditor } from "./player-editor";
 
@@ -84,5 +85,11 @@ describe("PlayerEditor", () => {
     expect((await screen.findByRole("alert")).textContent).toBe(
       "Ce joueur est inscrit à 2 tournois : retire-le de ces tournois avant de supprimer.",
     );
+  });
+
+  it("passes the axe checks", async () => {
+    const { container } = setup();
+    await screen.findByRole("heading", { level: 1, name: "Kestrel" });
+    await expectNoAxeViolations(container);
   });
 });

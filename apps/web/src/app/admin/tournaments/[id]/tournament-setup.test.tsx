@@ -5,6 +5,7 @@ import { describe, expect, it } from "@jest/globals";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { Tournament, TournamentTeam } from "@/lib/api/models";
+import { expectNoAxeViolations } from "@/test/axe";
 import { fakeApi } from "@/test/fake-api";
 import { TournamentSetup } from "./tournament-setup";
 
@@ -224,5 +225,12 @@ describe("TournamentSetup", () => {
     expect(
       screen.queryByRole("button", { name: "Générer l'arbre" }),
     ).toBeNull();
+  });
+
+  it("passes the axe checks, manual seeding and confirmation shown", async () => {
+    const { ui, container } = setup([entry("Alpha"), entry("Bravo")]);
+    await ui.click(await screen.findByLabelText(/^Manuel/));
+    await ui.click(screen.getByRole("button", { name: "Générer l'arbre" }));
+    await expectNoAxeViolations(container);
   });
 });

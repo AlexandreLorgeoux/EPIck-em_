@@ -5,6 +5,7 @@ import { mockRouter } from "@/test/mock-navigation";
 import { beforeEach, describe, expect, it } from "@jest/globals";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { expectNoAxeViolations } from "@/test/axe";
 import { fakeApi } from "@/test/fake-api";
 import { TournamentForm } from "./tournament-form";
 
@@ -50,7 +51,7 @@ describe("TournamentForm", () => {
       ],
     });
     const ui = userEvent.setup();
-    render(<TournamentForm />);
+    const { container } = render(<TournamentForm />);
 
     await ui.type(screen.getByLabelText("Nom"), "WC");
     await ui.click(screen.getByRole("button", { name: "Créer le tournoi" }));
@@ -70,5 +71,6 @@ describe("TournamentForm", () => {
       screen.getByLabelText("Jeu").getAttribute("aria-invalid"),
     ).toBeNull();
     expect(mockRouter.push).not.toHaveBeenCalled();
+    await expectNoAxeViolations(container);
   });
 });

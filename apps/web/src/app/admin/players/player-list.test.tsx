@@ -5,6 +5,7 @@ import { describe, expect, it } from "@jest/globals";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { Player } from "@/lib/api/models";
+import { expectNoAxeViolations } from "@/test/axe";
 import { fakeApi } from "@/test/fake-api";
 import { PlayerList } from "./player-list";
 
@@ -52,5 +53,12 @@ describe("PlayerList", () => {
       screen.getAllByRole("rowheader").map((cell) => cell.textContent),
     ).toEqual(["Kestrel"]);
     expect(screen.getByRole("status").textContent).toBe("1 joueur sur 2");
+  });
+
+  it("passes the axe checks", async () => {
+    fakeApi({ "GET /players": [200, players] });
+    const { container } = render(<PlayerList />);
+    await screen.findByText("2 joueurs");
+    await expectNoAxeViolations(container);
   });
 });
