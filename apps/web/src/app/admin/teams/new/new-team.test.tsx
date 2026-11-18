@@ -5,6 +5,7 @@ import { mockRouter } from "@/test/mock-navigation";
 import { beforeEach, describe, expect, it } from "@jest/globals";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { expectNoAxeViolations } from "@/test/axe";
 import { fakeApi } from "@/test/fake-api";
 import { NewTeam } from "./new-team";
 
@@ -66,5 +67,22 @@ describe("NewTeam", () => {
       "⚠ «Tag» doit faire entre 1 et 8 caractères. Tu en as saisi 9 : retire au moins 1 caractère.",
     );
     expect(mockRouter.push).not.toHaveBeenCalled();
+  });
+
+  it("passes the axe checks, errors shown", async () => {
+    fakeApi({
+      "POST /teams": [
+        400,
+        {
+          message: ["name must be between 2 and 64 characters"],
+          errors: { name: ["name must be between 2 and 64 characters"] },
+        },
+      ],
+    });
+    const ui = userEvent.setup();
+    const { container } = render(<NewTeam />);
+    await ui.click(screen.getByRole("button", { name: "Créer l'équipe" }));
+    await screen.findByText(/«Nom» doit faire/);
+    await expectNoAxeViolations(container);
   });
 });

@@ -5,6 +5,7 @@ import { describe, expect, it } from "@jest/globals";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { Team } from "@/lib/api/models";
+import { expectNoAxeViolations } from "@/test/axe";
 import { fakeApi } from "@/test/fake-api";
 import { TeamList } from "./team-list";
 
@@ -70,5 +71,12 @@ describe("TeamList", () => {
     expect((await screen.findByRole("alert")).textContent).toBe(
       "Le serveur ne répond pas : vérifie ta connexion et réessaie.",
     );
+  });
+
+  it("passes the axe checks", async () => {
+    fakeApi({ "GET /teams": [200, teams] });
+    const { container } = render(<TeamList />);
+    await screen.findByText("2 équipes");
+    await expectNoAxeViolations(container);
   });
 });

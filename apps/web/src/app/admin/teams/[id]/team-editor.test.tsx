@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it } from "@jest/globals";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { Player, Team } from "@/lib/api/models";
+import { expectNoAxeViolations } from "@/test/axe";
 import { fakeApi } from "@/test/fake-api";
 import { TeamEditor } from "./team-editor";
 
@@ -203,5 +204,13 @@ describe("TeamEditor", () => {
         screen.getByRole("button", { name: "Supprimer l'équipe" }),
       ),
     );
+  });
+
+  it("passes the axe checks, deletion question open", async () => {
+    const { ui, container } = setup();
+    await ui.click(
+      await screen.findByRole("button", { name: "Supprimer l'équipe" }),
+    );
+    await expectNoAxeViolations(container);
   });
 });

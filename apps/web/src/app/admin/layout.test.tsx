@@ -6,6 +6,7 @@ import { describe, expect, it } from "@jest/globals";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { AuthProvider } from "@/lib/auth/auth-provider";
+import { expectNoAxeViolations } from "@/test/axe";
 import { fakeApi, user } from "@/test/fake-api";
 import AdminLayout from "./layout";
 
@@ -56,5 +57,11 @@ describe("AdminLayout", () => {
     renderAt("/admin");
     expect(await screen.findByText("Connecté en tant que Zywoo")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Se déconnecter" })).toBeTruthy();
+  });
+
+  it("passes the axe checks", async () => {
+    const { container } = renderAt("/admin/players");
+    await screen.findByText("Connecté en tant que Zywoo");
+    await expectNoAxeViolations(container);
   });
 });

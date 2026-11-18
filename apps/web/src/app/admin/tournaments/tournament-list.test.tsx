@@ -4,6 +4,7 @@
 import { describe, expect, it } from "@jest/globals";
 import { render, screen, within } from "@testing-library/react";
 import type { Tournament } from "@/lib/api/models";
+import { expectNoAxeViolations } from "@/test/axe";
 import { fakeApi } from "@/test/fake-api";
 import { TournamentList } from "./tournament-list";
 
@@ -71,5 +72,14 @@ describe("TournamentList", () => {
     expect((await screen.findByRole("alert")).textContent).toBe(
       "Internal server error",
     );
+  });
+
+  it("passes the axe checks", async () => {
+    fakeApi({
+      "GET /tournaments": [200, [tournament("Winter Cup", "running")]],
+    });
+    const { container } = render(<TournamentList />);
+    await screen.findByRole("link", { name: "Winter Cup" });
+    await expectNoAxeViolations(container);
   });
 });

@@ -5,6 +5,7 @@ import { mockRouter } from "@/test/mock-navigation";
 import { beforeEach, describe, expect, it } from "@jest/globals";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { expectNoAxeViolations } from "@/test/axe";
 import { fakeApi } from "@/test/fake-api";
 import { NewPlayer } from "./new-player";
 
@@ -35,7 +36,7 @@ describe("NewPlayer", () => {
       ],
     });
     const ui = userEvent.setup();
-    render(<NewPlayer />);
+    const { container } = render(<NewPlayer />);
     await ui.type(screen.getByLabelText("Pseudo"), "B{Enter}");
 
     const handle = screen.getByLabelText("Pseudo");
@@ -43,5 +44,6 @@ describe("NewPlayer", () => {
     expect(screen.getByText(/«Pseudo» doit faire/).textContent).toBe(
       "⚠ «Pseudo» doit faire entre 2 et 32 caractères. Tu en as saisi 1 : ajoute au moins 1 caractère.",
     );
+    await expectNoAxeViolations(container);
   });
 });
