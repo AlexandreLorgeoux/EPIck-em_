@@ -139,9 +139,9 @@ export function TournamentSetup({ id }: { id: string }) {
 
   if (loadError) {
     return (
-      <main className="mx-auto max-w-3xl px-4 py-16">
+      <div className="mx-auto max-w-3xl px-4 py-16">
         <p role="alert">{loadError}</p>
-      </main>
+      </div>
     );
   }
   if (!tournament) {
@@ -156,7 +156,7 @@ export function TournamentSetup({ id }: { id: string }) {
     .filter((t): t is TournamentTeam => !!t);
 
   return (
-    <main className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-16">
+    <div className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-16">
       <Link
         href={routes.admin.tournaments}
         className="underline underline-offset-4"
@@ -390,6 +390,6 @@ export function TournamentSetup({ id }: { id: string }) {
           )}
         </section>
       )}
-    </main>
+    </div>
   );
 }

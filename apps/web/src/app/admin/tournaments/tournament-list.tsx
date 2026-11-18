@@ -26,7 +26,7 @@ export function TournamentList() {
   }, []);
 
   return (
-    <main className="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-16">
+    <div className="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-16">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <h1 className="text-3xl font-bold">Tournois</h1>
         <Link
@@ -85,6 +85,6 @@ export function TournamentList() {
           </tbody>
         </table>
       )}
-    </main>
+    </div>
   );
 }

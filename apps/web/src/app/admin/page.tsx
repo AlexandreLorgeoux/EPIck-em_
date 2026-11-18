@@ -4,23 +4,44 @@ import { routes } from "@/lib/routes";
 
 export const metadata: Metadata = { title: "Administration · EPIck'em" };
 
-// Entry of the admin area, reserved to admins by src/proxy.ts. Its layout
-// and navigation come with ticket #25.
+const sections = [
+  {
+    href: routes.admin.tournaments,
+    title: "Tournois",
+    text: "Créer un tournoi, inscrire les équipes et générer l'arbre.",
+  },
+  {
+    href: routes.admin.teams,
+    title: "Équipes",
+    text: "Créer les équipes, choisir leurs joueurs et leur capitaine.",
+  },
+  {
+    href: routes.admin.players,
+    title: "Joueurs",
+    text: "Créer les joueurs avant de les ajouter à une équipe.",
+  },
+];
+
+// Entry of the admin area, reserved to admins by src/proxy.ts
 export default function AdminHomePage() {
   return (
-    <main className="mx-auto flex max-w-xl flex-col gap-6 px-4 py-16">
+    <div className="mx-auto flex max-w-5xl flex-col gap-6 px-4 py-12">
       <h1 className="text-3xl font-bold">Administration</h1>
-      <ul className="flex flex-col gap-3">
-        <li>
-          <Link
-            href={routes.admin.tournaments}
-            className="underline underline-offset-4"
-          >
-            Tournois
-          </Link>
-        </li>
+      <ul className="grid gap-4 sm:grid-cols-3">
+        {sections.map((section) => (
+          <li key={section.href} className="rounded-md border-2 p-4">
+            <h2 className="text-xl font-bold">
+              <Link
+                href={section.href}
+                className="underline underline-offset-4"
+              >
+                {section.title}
+              </Link>
+            </h2>
+            <p>{section.text}</p>
+          </li>
+        ))}
       </ul>
-      <p>Les écrans de gestion des équipes et des joueurs arrivent bientôt.</p>
-    </main>
+    </div>
   );
 }
