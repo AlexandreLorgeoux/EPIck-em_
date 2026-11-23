@@ -19,8 +19,9 @@ export class MatchResultsService {
     private readonly bracket: BracketService,
   ) {}
 
-  // Saves the raw result (version 1) and moves the winner forward, in one
-  // transaction. Returns the updated bracket.
+  // Saves the raw result and moves the winner forward, in one transaction.
+  // A match that already has a result gets a new version with a reason:
+  // the earlier ones stay, append-only. Returns the updated bracket.
   async record(matchId: string, dto: RecordResultDto, user: AuthUser) {
     const [first, second] = dto.scores;
     const winner = roundsWinner([[first, second]]);
@@ -51,7 +52,11 @@ export class MatchResultsService {
         where: { id: matchId },
         select: {
           label: true,
-          _count: { select: { results: true } },
+          results: {
+            orderBy: { version: 'desc' },
+            take: 1,
+            select: { id: true, version: true },
+          },
           slots: {
             orderBy: { position: 'asc' },
             select: { position: true, assignment: true },
@@ -64,9 +69,12 @@ export class MatchResultsService {
           `${current.label} has a bye: there is no result to enter`,
         );
       }
-      // A correction is a new version with a reason: not this endpoint
-      if (current._count.results) {
-        throw new ConflictException(`${current.label} already has a result`);
+      const previous = current.results[0];
+      if (previous && !dto.reason) {
+        throw fieldException(
+          'reason',
+          `reason is required to correct ${current.label}: say why the result changes`,
+        );
       }
       if (assignments.some((a) => a?.state !== 'assigned')) {
         throw new ConflictException(
@@ -79,7 +87,9 @@ export class MatchResultsService {
       await tx.matchResult.create({
         data: {
           matchId,
-          version: 1,
+          version: (previous?.version ?? 0) + 1,
+          supersedesId: previous?.id,
+          reason: dto.reason,
           outcomeKind: 'played',
           declaredWinnerSlot: dto.winnerSlot,
           reportedById: user.id,

@@ -173,6 +173,8 @@ export class BracketService {
         label: match.label,
         position: match.position,
         state: match.outcome?.state ?? 'pending',
+        // A bye is decided without a result: only played matches have one
+        hasResult: match.outcome?.resultId != null,
         slots: match.slots.map((slot) => {
           const registration = slot.assignment?.registration;
           return {
