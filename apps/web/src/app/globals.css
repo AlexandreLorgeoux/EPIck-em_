@@ -1,1 +1,111 @@
 @import "tailwindcss";
+@import "../styles/oracup-tokens.css";
+/* In the components layer, so a Tailwind utility can still adjust them */
+@import "../styles/oracup-components.css" layer(components);
+
+/* Oracup tokens as Tailwind utilities: bg-surface, text-ink, border-line,
+   border-border-ui, text-brand, text-loss... (docs/CHARTE.md, annexe G).
+   inline: utilities read the token, so they follow the theme. */
+@theme inline {
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-strong: var(--surface-strong);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-line: var(--line);
+  --color-border-ui: var(--border-ui);
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-on-brand: var(--on-brand);
+  --color-signal: var(--signal);
+  --color-on-signal: var(--on-signal);
+  --color-loss: var(--loss);
+  --color-on-loss: var(--on-loss);
+}
+
+@theme {
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+}
+
+/* The fonts next/font serves (app/layout.tsx), ahead of the fallbacks */
+:root {
+  --font-display:
+    var(--font-archivo), "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --font-body:
+    var(--font-atkinson), "Atkinson Hyperlegible", "Segoe UI", system-ui,
+    sans-serif;
+}
+
+@layer base {
+  html {
+    color-scheme: light dark;
+  }
+  :root[data-theme="light"] {
+    color-scheme: light;
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+  }
+  body {
+    background: var(--surface);
+    color: var(--ink);
+    font: 400 16px/24px var(--font-body);
+  }
+  a {
+    color: var(--brand);
+  }
+  /* Focus ring of the charter on every control, not only oc-* ones */
+  :where(button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: var(--stroke-focus) solid var(--focus);
+    outline-offset: 2px;
+  }
+  input[type="radio"],
+  input[type="checkbox"] {
+    accent-color: var(--brand);
+    width: 20px;
+    height: 20px;
+  }
+}
+
+/* Logo: name in Archivo 125 %, weight 800; the dot is always signal yellow,
+   ringed in ink on light surfaces only (oracup-mark vs oracup-mark-dark) */
+.oc-wordmark {
+  font-family: var(--font-display);
+  font-stretch: 125%;
+  font-weight: 800;
+  font-size: 22px;
+  line-height: 28px;
+  letter-spacing: -0.01em;
+}
+.oc-logo-dot {
+  fill: var(--signal);
+  stroke: var(--ink);
+  stroke-width: 2.5;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .oc-logo-dot {
+    stroke: none;
+  }
+}
+:root[data-theme="dark"] .oc-logo-dot {
+  stroke: none;
+}
+
+/* Small screens: the page titles step down one size so a long tournament
+   name still fits at 390px wide (CHARTE.md: complete on a small screen),
+   and any word too long for the line may break */
+:where(.display-xl, .display, .title, .heading) {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 640px) {
+  .display-xl {
+    font-size: 40px;
+    line-height: 44px;
+  }
+  .display {
+    font-size: 32px;
+    line-height: 38px;
+  }
+}

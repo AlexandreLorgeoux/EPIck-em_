@@ -1,0 +1,187 @@
+/* Copy of docs/design-system/tokens.css (Oracup), plus the system dark
+   theme below. Update both together. */
+/* Oracup — generated from tokens.json */
+:root,
+[data-theme="light"] {
+  --surface: #f3f6f4; /* Fond de page. Porte `ink`, `ink-soft`, `brand` (liens) et `loss` à 4,5:1 minimum dans les deux thèmes. Le dashboard en direct utilise toujours le thème sombre. */
+  --surface-raised: #ffffff; /* Cartes, champs de saisie, feuilles et barre d'onglets. Porte `ink`, `ink-soft`, `brand`, `loss` et `signal` (thème sombre seulement) à 4,5:1 minimum. */
+  --surface-strong: #e4ebe8; /* Zones en creux, survol, choix sélectionné, éléments verrouillés, piste des jauges. Porte `ink`, `ink-soft`, `brand` et `loss` à 4,5:1 minimum. */
+  --ink: #11201f; /* Texte courant sur `surface`, `surface-raised` et `surface-strong`. Trait du logo sur fond clair ou sombre. */
+  --ink-soft: #3f5350; /* Texte secondaire (aides, métadonnées, onglets inactifs) sur `surface`, `surface-raised` et `surface-strong`. Jamais en dessous de 14px. */
+  --line: #c9d6d2; /* Séparateurs et contour de carte, purement décoratifs. Ne délimite jamais seul un champ, un bouton ou un choix : utiliser `border-ui`. */
+  --border-ui: #6b817d; /* Contour des champs, boutons secondaires, choix non sélectionnés et traits d'arbre. 3:1 minimum sur `surface`, `surface-raised` et `surface-strong`. */
+  --brand: #0c5c57; /* Couleur de marque : fond des actions principales (texte `on-brand`), liens, état Juste, choix sélectionné, onglet actif. Elle s'éclaircit en thème sombre. */
+  --brand-hover: #094744; /* Survol et appui des actions principales. Texte `on-brand` dessus. */
+  --on-brand: #ffffff; /* Texte et icônes posés sur `brand` et `brand-hover`. Blanc en thème clair, sombre en thème sombre : jamais de blanc littéral. */
+  --signal: #ffc83d; /* Jaune d'attention réservé au direct et à la pastille du pronostic. Toujours un fond avec `on-signal` dessus. Seul sur fond clair il n'atteint que 1,5:1 : ne jamais l'utiliser en texte ni en trait clair. */
+  --on-signal: #11201f; /* Texte et icônes posés sur `signal` (10,9:1 en clair, 11,8:1 en sombre). */
+  --loss: #b3263e; /* Erreurs de saisie, état Faux, actions destructives. Toujours accompagné d'une icône et d'un mot, jamais seul. En thème sombre il s'éclaircit. */
+  --on-loss: #ffffff; /* Texte posé sur un fond `loss`. */
+  --focus: var(
+    --ink
+  ); /* Anneau de focus : trait plein de 3px décalé de 2px (`stroke-focus`). 3:1 minimum sur toutes les surfaces, dans les deux thèmes. */
+}
+[data-theme="dark"] {
+  --surface: #0c1716;
+  --surface-raised: #142423;
+  --surface-strong: #1c3231;
+  --ink: #eef5f2;
+  --ink-soft: #a9bdb8;
+  --line: #2e4745;
+  --border-ui: #7c9893;
+  --brand: #5ed3c6;
+  --brand-hover: #8fe3d9;
+  --on-brand: #0c1716;
+  --signal: #ffc83d;
+  --on-signal: #0c1716;
+  --loss: #ff8da0;
+  --on-loss: #0c1716;
+  --focus: #ffc83d;
+}
+
+/* Added for the web: with no forced theme, dark follows the system setting
+   (CHARTE.md, Couleur). data-theme="light" or "dark" still forces one. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --surface: #0c1716;
+    --surface-raised: #142423;
+    --surface-strong: #1c3231;
+    --ink: #eef5f2;
+    --ink-soft: #a9bdb8;
+    --line: #2e4745;
+    --border-ui: #7c9893;
+    --brand: #5ed3c6;
+    --brand-hover: #8fe3d9;
+    --on-brand: #0c1716;
+    --signal: #ffc83d;
+    --on-signal: #0c1716;
+    --loss: #ff8da0;
+    --on-loss: #0c1716;
+    --focus: #ffc83d;
+  }
+}
+
+:root {
+  --space-1: 4px; /* Entre un libellé et son aide, entre une icône et son mot. */
+  --space-2: 8px; /* Entre éléments liés (icône et texte, badges). */
+  --space-3: 12px; /* Marge intérieure d'un champ ou d'un choix. */
+  --space-4: 16px; /* Marge intérieure d'une carte, gouttière mobile. */
+  --space-6: 24px; /* Entre cartes, entre groupes de champs. */
+  --space-8: 32px; /* Entre sections. */
+  --space-12: 48px; /* Marge d'une page web ou d'un écran projeté. */
+  --target-web: 44px; /* Hauteur minimale d'un bouton, d'un champ ou d'un lien isolé sur le web. */
+  --target-mobile: 48px; /* Zone tactile minimale sur mobile (48 dp Android, au-delà des 44 pt iOS). */
+  --radius-sm: 6px; /* Champs de saisie, cases d'arbre. */
+  --radius-md: 12px; /* Boutons, cartes, choix de pronostic. */
+  --radius-lg: 16px; /* Feuilles, grands blocs, écran mobile. */
+  --radius-pill: 999px; /* Badges de statut. */
+  --stroke-hairline: 1px; /* Séparateurs et contour de carte (couleur `line`). */
+  --stroke-control: 2px; /* Contour des champs, boutons secondaires, badges, icônes (couleur `border-ui`). */
+  --stroke-focus: 3px; /* Anneau de focus (couleur `focus`, décalé de 2px). */
+  --font-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --text-display-xl: 800 56px/60px var(--font-display); /* Titre d'une page d'accueil de tournoi. Archivo en largeur 125 (`font-stretch: 125%`). */
+  --text-display: 800 40px/44px var(--font-display); /* Titre de page. */
+  --text-title: 700 28px/34px var(--font-display); /* Titre de section ou d'écran mobile. */
+  --text-heading: 700 22px/28px var(--font-display); /* Titre de carte. */
+  --text-score: 800 40px/40px var(--font-display); /* Scores et points. Chiffres tabulaires. */
+  --text-body-lg: 400 18px/28px var(--font-body); /* Texte d'introduction. */
+  --text-body: 400 16px/24px var(--font-body); /* Texte courant, valeur des champs, boutons (en 700). */
+  --text-body-sm: 400 14px/20px var(--font-body); /* Aides, métadonnées. Taille minimale du produit. */
+  --text-label: 700 14px/20px var(--font-body); /* Libellés de champ, badges, onglets. */
+  --text-overline: 700 14px/20px var(--font-body); /* Sigle de statut en capitales (EN DIRECT). Seul usage des capitales. */
+  --text-dash-body: 400 32px/44px var(--font-body); /* Texte courant du dashboard projeté, lisible à 10 m. */
+  --text-dash-title: 800 56px/60px var(--font-display); /* Titre du tournoi et noms d'équipes. */
+  --text-dash-score: 800 112px/112px var(--font-display); /* Score du match en cours. Chiffres tabulaires. */
+}
+.display-xl {
+  font-family: var(--font-display);
+  font-size: 56px;
+  line-height: 60px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+.display {
+  font-family: var(--font-display);
+  font-size: 40px;
+  line-height: 44px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+.title {
+  font-family: var(--font-display);
+  font-size: 28px;
+  line-height: 34px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+.heading {
+  font-family: var(--font-display);
+  font-size: 22px;
+  line-height: 28px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+.score {
+  font-family: var(--font-display);
+  font-size: 40px;
+  line-height: 40px;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+.body-lg {
+  font-family: var(--font-body);
+  font-size: 18px;
+  line-height: 28px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.body {
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.body-sm {
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.label {
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+.overline {
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+.dash-body {
+  font-family: var(--font-body);
+  font-size: 32px;
+  line-height: 44px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.dash-title {
+  font-family: var(--font-display);
+  font-size: 56px;
+  line-height: 60px;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+.dash-score {
+  font-family: var(--font-display);
+  font-size: 112px;
+  line-height: 112px;
+  font-weight: 800;
+  letter-spacing: 0;
+}
