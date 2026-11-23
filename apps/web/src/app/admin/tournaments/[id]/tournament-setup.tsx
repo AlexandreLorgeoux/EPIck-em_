@@ -25,7 +25,14 @@ const button =
 // Setup of one tournament: its teams, their seeding and the bracket.
 // Everything can change while it is a draft; generating the bracket starts
 // the tournament and freezes the rest.
-export function TournamentSetup({ id }: { id: string }) {
+export function TournamentSetup({
+  id,
+  onStarted,
+}: {
+  id: string;
+  // Refreshes the public pages, where the tournament now appears
+  onStarted?: (slug: string) => Promise<void>;
+}) {
   const [tournament, setTournament] = useState<Tournament | null>(null);
   const [teams, setTeams] = useState<TournamentTeam[]>([]);
   const [allTeams, setAllTeams] = useState<Team[]>([]);
@@ -130,6 +137,7 @@ export function TournamentSetup({ id }: { id: string }) {
       ]);
       setTournament(t);
       showTeams(list);
+      onStarted?.(t.slug).catch(() => {});
       return "Arbre généré : le tournoi est en cours.";
     });
 

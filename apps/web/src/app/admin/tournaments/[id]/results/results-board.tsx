@@ -18,7 +18,14 @@ import { ResultForm } from "./result-form";
 // Enter and correct the results of a running tournament, from the bracket
 // or from the table of matches: both show the same data and open the same
 // form, one match at a time.
-export function ResultsBoard({ id }: { id: string }) {
+export function ResultsBoard({
+  id,
+  onResultSaved,
+}: {
+  id: string;
+  // Refreshes the public page of the tournament (a server action)
+  onResultSaved?: (slug: string) => Promise<void>;
+}) {
   const [tournament, setTournament] = useState<Tournament | null>(null);
   const [bracket, setBracket] = useState<Bracket | null>(null);
   const [open, setOpen] = useState<BracketMatch | null>(null);
@@ -68,6 +75,9 @@ export function ResultsBoard({ id }: { id: string }) {
     setBracket(next);
     setAnnouncement(announceResult(next, matchId));
     close();
+    // Visitors see the result at once; a failure only delays it until the
+    // cache expires, so it is not shown
+    onResultSaved?.(tournament!.slug).catch(() => {});
     // The final decides whether the tournament is finished
     setTournament(await api.get<Tournament>(`/tournaments/${id}`));
   }

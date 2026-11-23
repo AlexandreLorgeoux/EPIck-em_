@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { refreshPublicTournament } from "@/app/tournaments/actions";
 import { ResultsBoard } from "./results-board";
 
 export const metadata: Metadata = { title: "Résultats · Administration" };
@@ -8,7 +9,7 @@ export const metadata: Metadata = { title: "Résultats · Administration" };
 // of the page can still be prerendered (Cache Components)
 async function Board({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  return <ResultsBoard id={id} />;
+  return <ResultsBoard id={id} onResultSaved={refreshPublicTournament} />;
 }
 
 export default function AdminResultsPage({
