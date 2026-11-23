@@ -240,12 +240,16 @@ describe('Match results (e2e)', () => {
       );
     });
 
-    it('refuses a second result for the same match', async () => {
+    it('needs a reason to change a result, on the reason field', async () => {
       const { bracket } = await running(2);
       const final = matchOf(bracket, 1, 1);
       await enter(final.id, [1, 0], 1).expect(201);
-      const res = await enter(final.id, [0, 1], 2).expect(409);
-      expect(res.body.message).toBe(`${final.label} already has a result`);
+      const res = await enter(final.id, [0, 1], 2).expect(400);
+      expect(res.body.errors).toEqual({
+        reason: [
+          `reason is required to correct ${final.label}: say why the result changes`,
+        ],
+      });
       expect(await prisma.matchResult.count()).toBe(1);
     });
 
@@ -257,7 +261,7 @@ describe('Match results (e2e)', () => {
         enter(final.id, [0, 1], 2),
       ]);
       expect(answers.map((r) => r.status).sort((a, b) => a - b)).toEqual([
-        201, 409,
+        201, 400,
       ]);
       expect(await prisma.matchResult.count()).toBe(1);
     });
