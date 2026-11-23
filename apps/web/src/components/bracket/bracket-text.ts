@@ -75,3 +75,10 @@ export function announceResult(bracket: Bracket, matchId: string): string {
   }
   return sentence;
 }
+
+// The team that won the final, once it is played
+export function championOf(bracket: Bracket): string | null {
+  const final = bracket.rounds.at(-1)?.matches[0];
+  if (final?.state !== "decided") return null;
+  return final.slots.find((slot) => slot.winner)?.team?.name ?? null;
+}
