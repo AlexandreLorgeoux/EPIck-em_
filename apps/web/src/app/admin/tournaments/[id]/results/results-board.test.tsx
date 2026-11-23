@@ -134,9 +134,9 @@ describe("ResultsBoard", () => {
       [
         "Demi-finales",
         "Match 1",
-        "Alpha✓ Vainqueur",
+        "Alpha Vainqueur",
         "3 – 1",
-        "Delta✕ Éliminé",
+        "Delta Éliminé",
         "Terminé",
       ],
       ["Demi-finales", "Match 2", "Bravo", "—", "Charlie", "À jouer"],
@@ -280,7 +280,7 @@ describe("ResultsBoard", () => {
       document.getElementById(alpha.getAttribute("aria-describedby")!)
         ?.textContent,
     ).toBe(
-      "⚠ Un match ne peut pas finir à égalité : saisis le score qui a départagé les équipes.",
+      "Un match ne peut pas finir à égalité : saisis le score qui a départagé les équipes.",
     );
     // Nothing announced until a result is saved
     expect(screen.getByRole("status").textContent).toBe("");

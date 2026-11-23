@@ -42,7 +42,7 @@ describe("NewPlayer", () => {
     const handle = screen.getByLabelText("Pseudo");
     await waitFor(() => expect(document.activeElement).toBe(handle));
     expect(screen.getByText(/«Pseudo» doit faire/).textContent).toBe(
-      "⚠ «Pseudo» doit faire entre 2 et 32 caractères. Tu en as saisi 1 : ajoute au moins 1 caractère.",
+      "«Pseudo» doit faire entre 2 et 32 caractères. Tu en as saisi 1 : ajoute au moins 1 caractère.",
     );
     await expectNoAxeViolations(container);
   });

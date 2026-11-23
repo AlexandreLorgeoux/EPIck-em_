@@ -1,27 +1,24 @@
 import type { TournamentStatus } from "@/lib/api/models";
+import { Icon, type IconName } from "./brand/icon";
 
-const labels: Record<TournamentStatus, string> = {
-  draft: "Brouillon",
-  running: "En cours",
-  finished: "Terminé",
+const badges: Record<
+  TournamentStatus,
+  { label: string; icon: IconName; variant: string }
+> = {
+  draft: { label: "Brouillon", icon: "lock", variant: "oc-badge--locked" },
+  running: { label: "En cours", icon: "live", variant: "oc-badge--soon" },
+  finished: { label: "Terminé", icon: "check", variant: "oc-badge--win" },
 };
 
-// Border styles only tell the statuses apart at a glance: the word is what
-// says the status, so it reads the same without colors
-const styles: Record<TournamentStatus, string> = {
-  draft: "border-dashed",
-  running: "border-solid",
-  finished: "border-double border-4",
-};
+export const statusLabel = (status: TournamentStatus) => badges[status].label;
 
-export const statusLabel = (status: TournamentStatus) => labels[status];
-
+// Oracup StatusBadge: an icon and a word, never the color alone
 export function StatusBadge({ status }: { status: TournamentStatus }) {
+  const { label, icon, variant } = badges[status];
   return (
-    <span
-      className={`inline-block rounded-full border-2 px-3 py-0.5 text-sm font-bold ${styles[status]}`}
-    >
-      {labels[status]}
+    <span className={`oc-badge ${variant}`}>
+      <Icon name={icon} />
+      {label}
     </span>
   );
 }

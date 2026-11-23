@@ -5,7 +5,7 @@ import type { Bracket, Tournament } from "./models";
 
 // Public pages read the API as an anonymous visitor, from the server, and
 // keep the answers in Next's cache. Saving a result expires the tags (see
-// src/app/tournaments/actions.ts); "minutes" is the fallback for changes
+// src/lib/api/refresh-public.ts); "minutes" is the fallback for changes
 // made elsewhere.
 
 export const TOURNAMENTS_TAG = "tournaments";

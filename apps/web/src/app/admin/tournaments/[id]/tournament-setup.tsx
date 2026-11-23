@@ -13,14 +13,13 @@ import type {
 } from "@/lib/api/models";
 import { routes } from "@/lib/routes";
 import { StatusBadge, formatDate } from "@/components/tournament-status";
+import { ErrorMessage } from "@/components/messages";
+import { buttonClass as button, primaryButtonClass } from "@/components/styles";
 
 const messageOf = (caught: unknown) =>
   isApiError(caught)
     ? explainMessage(caught.message)
     : "L'action a échoué. Réessaie dans un instant.";
-
-const button =
-  "min-h-11 rounded-md border-2 px-4 font-bold disabled:opacity-50";
 
 // Setup of one tournament: its teams, their seeding and the bracket.
 // Everything can change while it is a draft; generating the bracket starts
@@ -149,7 +148,7 @@ export function TournamentSetup({
   if (loadError) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-16">
-        <p role="alert">{loadError}</p>
+        <ErrorMessage>{loadError}</ErrorMessage>
       </div>
     );
   }
@@ -174,7 +173,7 @@ export function TournamentSetup({
       </Link>
 
       <header className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold">{tournament.name}</h1>
+        <h1 className="display">{tournament.name}</h1>
         <p className="flex flex-wrap items-center gap-3">
           <span>Statut :</span> <StatusBadge status={tournament.status} />
         </p>
@@ -186,7 +185,7 @@ export function TournamentSetup({
       <p role="status" className="sr-only">
         {notice}
       </p>
-      {error && <p role="alert">{error}</p>}
+      {error && <ErrorMessage>{error}</ErrorMessage>}
 
       {!draft && (
         <div className="flex flex-col gap-3">
@@ -196,7 +195,7 @@ export function TournamentSetup({
           </p>
           <Link
             href={routes.admin.results(id)}
-            className="inline-flex min-h-11 items-center self-start rounded-md border-2 px-4 font-bold"
+            className="oc-btn oc-btn--primary self-start"
           >
             Saisir les résultats
           </Link>
@@ -204,7 +203,7 @@ export function TournamentSetup({
       )}
 
       <section aria-labelledby="teams-heading" className="flex flex-col gap-4">
-        <h2 id="teams-heading" className="text-2xl font-bold">
+        <h2 id="teams-heading" className="title">
           Équipes ({teams.length})
         </h2>
 
@@ -220,13 +219,13 @@ export function TournamentSetup({
             }}
           >
             <div className="flex flex-col gap-1">
-              <label htmlFor={ids.pick} className="font-bold">
+              <label htmlFor={ids.pick} className="oc-field__label">
                 Équipe à ajouter
               </label>
               <select
                 id={ids.pick}
                 name="teamId"
-                className="min-h-11 rounded-md border-2 px-3"
+                className="oc-field__input"
                 disabled={!available.length}
               >
                 {available.map((t) => (
@@ -252,7 +251,7 @@ export function TournamentSetup({
 
         {draft && teams.length > 0 && (
           <fieldset className="flex flex-col gap-2">
-            <legend className="font-bold">Seeding</legend>
+            <legend className="oc-field__label">Seeding</legend>
             <label className="flex min-h-11 items-center gap-2">
               <input
                 type="radio"
@@ -283,11 +282,11 @@ export function TournamentSetup({
             {(draft ? ordered : teams).map((team, index) => (
               <li
                 key={team.id}
-                className="flex flex-wrap items-center gap-3 rounded-md border-2 px-3 py-2"
+                className="oc-card flex flex-wrap items-center gap-3"
               >
                 <span className="grow">
                   {(!draft || mode === "manual") && (
-                    <span className="font-bold">
+                    <span className="tabular font-bold">
                       {draft ? index + 1 : (team.seed ?? "—")}.{" "}
                     </span>
                   )}
@@ -354,7 +353,7 @@ export function TournamentSetup({
           aria-labelledby="bracket-heading"
           className="flex flex-col gap-4"
         >
-          <h2 id="bracket-heading" className="text-2xl font-bold">
+          <h2 id="bracket-heading" className="title">
             Arbre
           </h2>
           {teams.length < 2 && (
@@ -364,23 +363,19 @@ export function TournamentSetup({
             <button
               ref={generateRef}
               type="button"
-              className={`${button} self-start`}
+              className={`${primaryButtonClass} self-start`}
               disabled={pending || teams.length < 2}
               onClick={() => setConfirming(true)}
             >
               Générer l&apos;arbre
             </button>
           ) : (
-            <div
-              role="group"
-              aria-labelledby={ids.confirm}
-              className="flex flex-col gap-3 rounded-md border-2 p-4"
-            >
+            <div role="group" aria-labelledby={ids.confirm} className="oc-card">
               <h3
                 id={ids.confirm}
                 ref={confirmRef}
                 tabIndex={-1}
-                className="text-xl font-bold"
+                className="heading"
               >
                 Générer l&apos;arbre et démarrer le tournoi ?
               </h3>
@@ -393,7 +388,7 @@ export function TournamentSetup({
               <div className="flex flex-wrap gap-3">
                 <button
                   type="button"
-                  className={button}
+                  className={primaryButtonClass}
                   disabled={pending}
                   onClick={generate}
                 >

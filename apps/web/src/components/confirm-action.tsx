@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
-import { buttonClass } from "./styles";
+import { buttonClass, dangerButtonClass } from "./styles";
 
 /**
  * A button that asks for confirmation in place before an action that
@@ -53,24 +53,15 @@ export function ConfirmAction({
     );
   }
   return (
-    <div
-      role="group"
-      aria-labelledby={headingId}
-      className="flex flex-col gap-3 rounded-md border-2 p-4"
-    >
-      <h3
-        id={headingId}
-        ref={headingRef}
-        tabIndex={-1}
-        className="text-xl font-bold"
-      >
+    <div role="group" aria-labelledby={headingId} className="oc-card">
+      <h3 id={headingId} ref={headingRef} tabIndex={-1} className="heading">
         {question}
       </h3>
       {children}
       <div className="flex flex-wrap gap-3">
         <button
           type="button"
-          className={buttonClass}
+          className={dangerButtonClass}
           onClick={() => {
             setOpen(false);
             onConfirm();

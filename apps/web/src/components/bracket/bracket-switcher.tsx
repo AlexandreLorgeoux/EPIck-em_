@@ -39,10 +39,9 @@ export function BracketSwitcher({
             type="button"
             aria-pressed={view === option.value}
             onClick={() => setView(option.value)}
-            className={`min-h-11 rounded-md border-2 px-4 ${
-              view === option.value
-                ? "font-bold underline underline-offset-4"
-                : ""
+            // Pressed: filled like the main action, and aria-pressed
+            className={`oc-btn ${
+              view === option.value ? "oc-btn--primary" : "oc-btn--secondary"
             }`}
           >
             {option.label}

@@ -7,6 +7,7 @@ import { isApiError } from "@/lib/api/errors";
 import type { Bracket, BracketMatch, Tournament } from "@/lib/api/models";
 import { explainMessage } from "@/lib/forms/explain";
 import { routes } from "@/lib/routes";
+import { Icon } from "@/components/brand/icon";
 import { StatusBadge } from "@/components/tournament-status";
 import {
   announceResult,
@@ -14,6 +15,7 @@ import {
 } from "@/components/bracket/bracket-text";
 import { BracketSwitcher } from "@/components/bracket/bracket-switcher";
 import { ResultForm } from "./result-form";
+import { ErrorMessage } from "@/components/messages";
 
 // Enter and correct the results of a running tournament, from the bracket
 // or from the table of matches: both show the same data and open the same
@@ -85,7 +87,7 @@ export function ResultsBoard({
   if (loadError) {
     return (
       <div className="mx-auto flex max-w-3xl flex-col gap-4 px-4 py-12">
-        <p role="alert">{loadError}</p>
+        <ErrorMessage>{loadError}</ErrorMessage>
         <Link
           href={routes.admin.tournament(id)}
           className="underline underline-offset-4"
@@ -110,7 +112,7 @@ export function ResultsBoard({
         Retour au tournoi
       </Link>
       <header className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold">Résultats · {tournament.name}</h1>
+        <h1 className="display">Résultats · {tournament.name}</h1>
         <p className="flex flex-wrap items-center gap-3">
           <span>Statut :</span> <StatusBadge status={tournament.status} />
         </p>
@@ -122,8 +124,8 @@ export function ResultsBoard({
       </p>
 
       {toFix.length > 0 && (
-        <p className="rounded-md border-2 border-dashed p-3">
-          <span aria-hidden="true">⚠ </span>
+        <p className="oc-card flex items-start gap-2 border-2 border-dashed border-loss font-bold text-loss">
+          <Icon name="close" />
           {toFix.length === 1
             ? `${toFix[0].label} est à corriger : un résultat précédent a changé ses équipes.`
             : `${toFix.length} matchs sont à corriger : ${toFix.map((m) => m.label).join(", ")}.`}

@@ -19,7 +19,7 @@ const isCurrent = (href: string, path: string) =>
 
 export function NavLinks({ current }: { current: string | null }) {
   return (
-    <nav aria-label="Administration" className="mx-auto max-w-5xl px-4">
+    <nav aria-label="Administration" className="mx-auto max-w-6xl px-4">
       <ul className="flex flex-wrap gap-x-6">
         {sections.map(({ href, label }) => {
           const active = current !== null && isCurrent(href, current);
@@ -28,10 +28,12 @@ export function NavLinks({ current }: { current: string | null }) {
               <Link
                 href={href}
                 aria-current={active ? "page" : undefined}
-                // The current section is marked by a thick underline and
-                // aria-current, not by a color
-                className={`inline-flex min-h-11 items-center border-b-4 ${
-                  active ? "border-current font-bold" : "border-transparent"
+                // Like the Oracup tabs: the current section is marked by a
+                // thick brand underline and aria-current, not by a color
+                className={`label inline-flex min-h-11 items-center border-b-4 no-underline ${
+                  active
+                    ? "border-brand text-brand"
+                    : "border-transparent text-ink-soft"
                 }`}
               >
                 {label}

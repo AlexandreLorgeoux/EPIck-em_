@@ -8,6 +8,7 @@ import { isApiError } from "@/lib/api/errors";
 import type { Team } from "@/lib/api/models";
 import { explainMessage } from "@/lib/forms/explain";
 import { routes } from "@/lib/routes";
+import { ErrorMessage } from "@/components/messages";
 
 export function TeamList() {
   const [teams, setTeams] = useState<Team[] | null>(null);
@@ -39,16 +40,13 @@ export function TeamList() {
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-6 px-4 py-12">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-3xl font-bold">Équipes</h1>
-        <Link
-          href={routes.admin.newTeam}
-          className="inline-flex min-h-11 items-center rounded-md border-2 px-4 font-bold"
-        >
+        <h1 className="display">Équipes</h1>
+        <Link href={routes.admin.newTeam} className="oc-btn oc-btn--primary">
           Créer une équipe
         </Link>
       </div>
 
-      {error && <p role="alert">{error}</p>}
+      {error && <ErrorMessage>{error}</ErrorMessage>}
       {!error && !teams && <p>Chargement des équipes…</p>}
       {teams?.length === 0 && (
         <p>Aucune équipe pour l&apos;instant. Crée la première.</p>
@@ -57,7 +55,7 @@ export function TeamList() {
       {!!teams?.length && (
         <>
           <div className="flex flex-col gap-1">
-            <label htmlFor={searchId} className="font-bold">
+            <label htmlFor={searchId} className="oc-field__label">
               Rechercher une équipe
             </label>
             <input
@@ -74,27 +72,19 @@ export function TeamList() {
               : `${shown.length} équipe${shown.length > 1 ? "s" : ""} sur ${teams.length}`}
           </p>
           {shown.length > 0 && (
-            <table className="w-full border-collapse text-left">
+            <table className="oc-table">
               <thead>
-                <tr className="border-b-2">
-                  <th scope="col" className="py-2 pr-4">
-                    Nom
-                  </th>
-                  <th scope="col" className="py-2 pr-4">
-                    Tag
-                  </th>
-                  <th scope="col" className="py-2 pr-4">
-                    Joueurs
-                  </th>
-                  <th scope="col" className="py-2">
-                    Capitaine
-                  </th>
+                <tr>
+                  <th scope="col">Nom</th>
+                  <th scope="col">Tag</th>
+                  <th scope="col">Joueurs</th>
+                  <th scope="col">Capitaine</th>
                 </tr>
               </thead>
               <tbody>
                 {shown.map((team) => (
-                  <tr key={team.id} className="border-b">
-                    <th scope="row" className="py-3 pr-4 font-normal">
+                  <tr key={team.id}>
+                    <th scope="row" className="font-normal">
                       <Link
                         href={routes.admin.team(team.id)}
                         className="font-bold underline underline-offset-4"
@@ -102,9 +92,9 @@ export function TeamList() {
                         {team.name}
                       </Link>
                     </th>
-                    <td className="py-3 pr-4">{team.tag ?? "—"}</td>
-                    <td className="py-3 pr-4">{team.members.length}</td>
-                    <td className="py-3">
+                    <td>{team.tag ?? "—"}</td>
+                    <td>{team.members.length}</td>
+                    <td>
                       {team.members.find((m) => m.id === team.captainPlayerId)
                         ?.handle ?? "—"}
                     </td>

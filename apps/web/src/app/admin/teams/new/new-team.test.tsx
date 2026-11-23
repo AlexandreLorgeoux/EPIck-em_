@@ -64,7 +64,7 @@ describe("NewTeam", () => {
     expect(tag.getAttribute("aria-invalid")).toBe("true");
     const errorId = tag.getAttribute("aria-describedby")!.split(" ").at(-1)!;
     expect(document.getElementById(errorId)?.textContent).toBe(
-      "⚠ «Tag» doit faire entre 1 et 8 caractères. Tu en as saisi 9 : retire au moins 1 caractère.",
+      "«Tag» doit faire entre 1 et 8 caractères. Tu en as saisi 9 : retire au moins 1 caractère.",
     );
     expect(mockRouter.push).not.toHaveBeenCalled();
   });

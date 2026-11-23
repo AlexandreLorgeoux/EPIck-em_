@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { routes } from "@/lib/routes";
 
-export const metadata: Metadata = { title: "Accès refusé · EPIck'em" };
+export const metadata: Metadata = { title: "Accès refusé" };
 
 // Shown in place of a page the user's role cannot open (src/proxy.ts), at
 // the same URL
 export default function ForbiddenPage() {
   return (
-    <main className="mx-auto flex max-w-xl flex-col gap-6 px-4 py-16">
-      <h1 className="text-3xl font-bold">Accès refusé</h1>
+    <div className="mx-auto flex max-w-xl flex-col gap-6 px-4 py-16">
+      <h1 className="display">Accès refusé</h1>
       <p>
         Ton compte n&apos;a pas accès à cette page. Si tu penses que c&apos;est
         une erreur, demande à un administrateur de vérifier ton rôle.
@@ -26,6 +26,6 @@ export default function ForbiddenPage() {
           </Link>
         </li>
       </ul>
-    </main>
+    </div>
   );
 }

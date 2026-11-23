@@ -22,21 +22,21 @@ export function TableView({
       tabIndex={0}
       className="overflow-x-auto"
     >
-      <table className="w-full border-collapse text-left">
+      <table className="oc-table">
         <caption className="sr-only">
           Tous les matchs, tour par tour, avec leur score et leur état
         </caption>
         <thead>
-          <tr className="border-b-2">
+          <tr>
             {["Tour", "Match", "Équipe 1", "Score", "Équipe 2", "État"].map(
               (title) => (
-                <th key={title} scope="col" className="py-2 pr-4">
+                <th key={title} scope="col">
                   {title}
                 </th>
               ),
             )}
             {onOpen && (
-              <th scope="col" className="py-2">
+              <th scope="col">
                 <span className="sr-only">Action</span>
               </th>
             )}
@@ -45,26 +45,26 @@ export function TableView({
         <tbody>
           {bracket.rounds.flatMap(({ round, matches }) =>
             matches.map((match) => {
-              const decided = match.state === "decided";
+              // Badges for played matches only: a bye is decided without a winner
+              // in the sporting sense
+              const decided = match.state === "decided" && match.hasResult;
               const [first, second] = match.slots;
               return (
-                <tr key={match.id} className="border-b align-top">
-                  <td className="py-3 pr-4">{roundName(round, rounds)}</td>
-                  <th scope="row" className="py-3 pr-4">
+                <tr key={match.id} className="align-top">
+                  <td>{roundName(round, rounds)}</td>
+                  <th scope="row" className="text-ink">
                     {match.label}
                   </th>
-                  <td className="py-3 pr-4">
+                  <td>
                     <TeamLabel slot={first} decided={decided} />
                   </td>
-                  <td className="py-3 pr-4 tabular-nums">
-                    {scoreText(match) || "—"}
-                  </td>
-                  <td className="py-3 pr-4">
+                  <td className="tabular">{scoreText(match) || "—"}</td>
+                  <td>
                     <TeamLabel slot={second} decided={decided} />
                   </td>
-                  <td className="py-3 pr-4">{matchStatus(match)}</td>
+                  <td>{matchStatus(match)}</td>
                   {onOpen && (
-                    <td className="py-3">
+                    <td>
                       <MatchAction
                         match={match}
                         onOpen={onOpen}

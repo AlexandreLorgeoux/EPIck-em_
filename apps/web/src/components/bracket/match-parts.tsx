@@ -1,9 +1,10 @@
 import type { BracketMatch, BracketSlot } from "@/lib/api/models";
+import { Icon } from "@/components/brand/icon";
 import { buttonClass } from "@/components/styles";
 import { isPlayable } from "./bracket-text";
 
-// A team in a match, with its outcome written out: the symbol helps at a
-// glance, the word is what screen readers and color-blind users get
+// A team in a match, with its outcome as an Oracup badge: the icon helps at
+// a glance, the word is what screen readers and color-blind users get
 export function TeamLabel({
   slot,
   decided,
@@ -11,21 +12,26 @@ export function TeamLabel({
   slot: BracketSlot;
   decided: boolean;
 }) {
-  if (slot.state === "bye") return <span>Sans adversaire</span>;
-  if (!slot.team) return <span className="italic">À déterminer</span>;
+  if (slot.state === "bye")
+    return <span className="text-ink-soft">Exempt</span>;
+  if (!slot.team) return <span className="text-ink-soft">À déterminer</span>;
   return (
-    <span className="inline-flex flex-wrap items-baseline gap-x-2">
+    <span className="inline-flex flex-wrap items-center gap-x-2 gap-y-1">
       <span className={slot.winner ? "font-bold" : undefined}>
         {slot.team.name}
       </span>
+      {/* Read as two words: "Alpha Vainqueur" */}
+      {decided && " "}
       {decided && slot.winner && (
-        <span className="rounded-full border-2 px-2 text-sm font-bold">
-          <span aria-hidden="true">✓ </span>Vainqueur
+        <span className="oc-badge oc-badge--win">
+          <Icon name="check" />
+          Vainqueur
         </span>
       )}
       {decided && !slot.winner && (
-        <span className="rounded-full border-2 border-dashed px-2 text-sm">
-          <span aria-hidden="true">✕ </span>Éliminé
+        <span className="oc-badge oc-badge--loss">
+          <Icon name="close" />
+          Éliminé
         </span>
       )}
     </span>

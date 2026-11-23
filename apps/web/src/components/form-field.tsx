@@ -1,4 +1,7 @@
 import { useId, type ReactNode } from "react";
+import { FieldError } from "./messages";
+
+export { controlClass } from "./styles";
 
 // What a control needs to be tied to its label, hint and error
 export interface ControlProps {
@@ -7,11 +10,9 @@ export interface ControlProps {
   "aria-describedby": string | undefined;
 }
 
-export const controlClass = "min-h-11 rounded-md border-2 px-3";
-
 /**
  * A labelled form control with its hint and error, linked for screen
- * readers. The control itself is rendered by `children`:
+ * readers (Oracup oc-field). The control itself is rendered by `children`:
  *
  *   <FormField label="Nom" error={errors.name}>
  *     {(props) => <input {...props} name="name" className={controlClass} />}
@@ -35,23 +36,22 @@ export function FormField({
     [hint && `${id}-hint`, error && `${id}-error`].filter(Boolean).join(" ") ||
     undefined;
   return (
-    <div className="flex flex-col gap-1">
-      <label htmlFor={id} className="font-bold">
+    <div className="oc-field">
+      <label htmlFor={id} className="oc-field__label">
         {label}
         {optional && <span className="font-normal"> (facultatif)</span>}
       </label>
-      {hint && <p id={`${id}-hint`}>{hint}</p>}
+      {hint && (
+        <p id={`${id}-hint`} className="oc-field__hint">
+          {hint}
+        </p>
+      )}
       {children({
         id,
         "aria-invalid": error ? true : undefined,
         "aria-describedby": describedBy,
       })}
-      {error && (
-        <p id={`${id}-error`} className="font-bold">
-          <span aria-hidden="true">⚠ </span>
-          {error}
-        </p>
-      )}
+      {error && <FieldError id={`${id}-error`}>{error}</FieldError>}
     </div>
   );
 }

@@ -21,7 +21,8 @@ const tokenFor = (role: string) =>
     .sign(new TextEncoder().encode(SECRET));
 
 // Loaded after the mocks above: Next's test compiler keeps import order
-const load = async () => (await import("./actions")).refreshPublicTournament;
+const load = async () =>
+  (await import("./refresh-public")).refreshPublicTournament;
 
 describe("refreshPublicTournament", () => {
   beforeEach(() => {
