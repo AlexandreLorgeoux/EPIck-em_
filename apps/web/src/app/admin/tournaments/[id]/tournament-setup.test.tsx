@@ -223,6 +223,11 @@ describe("TournamentSetup", () => {
     );
     expect(listed()).toEqual(["1. Bravo", "2. Alpha"]);
     expect(
+      screen
+        .getByRole("link", { name: "Saisir les résultats" })
+        .getAttribute("href"),
+    ).toBe("/admin/tournaments/t1/results");
+    expect(
       screen.queryByRole("button", { name: "Générer l'arbre" }),
     ).toBeNull();
   });
