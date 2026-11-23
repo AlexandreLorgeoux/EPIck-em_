@@ -1,7 +1,7 @@
 /**
  * @jest-environment jsdom
  */
-import { describe, expect, it } from "@jest/globals";
+import { describe, expect, it, jest } from "@jest/globals";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type {
@@ -93,8 +93,9 @@ function setup(bracket: Bracket = start) {
     "GET /tournaments/t1": [200, tournament],
     "GET /tournaments/t1/bracket": [200, bracket],
   });
-  const view = render(<ResultsBoard id="t1" />);
-  return { fake, ui: userEvent.setup(), ...view };
+  const refresh = jest.fn<(slug: string) => Promise<void>>(async () => {});
+  const view = render(<ResultsBoard id="t1" onResultSaved={refresh} />);
+  return { fake, refresh, ui: userEvent.setup(), ...view };
 }
 
 const card = (label: string) =>
@@ -151,7 +152,7 @@ describe("ResultsBoard", () => {
   });
 
   it("enters a result, announces where the winner goes, and returns focus", async () => {
-    const { fake, ui } = setup();
+    const { fake, refresh, ui } = setup();
     await ui.click(
       await screen.findByRole("button", {
         name: "Saisir le résultat de Match 1",
@@ -183,6 +184,8 @@ describe("ResultsBoard", () => {
       scores: [3, 1],
       winnerSlot: 1,
     });
+    // The public page is refreshed for visitors
+    expect(refresh).toHaveBeenCalledWith("winter-cup");
     await waitFor(() =>
       expect(document.activeElement).toBe(
         screen.getByRole("button", { name: "Corriger de Match 1" }),
@@ -244,7 +247,7 @@ describe("ResultsBoard", () => {
   });
 
   it("explains a refused score in French and focuses what to fix", async () => {
-    const { fake, ui } = setup();
+    const { fake, refresh, ui } = setup();
     fake.set("POST /matches/m1/result", [
       400,
       {
@@ -281,6 +284,7 @@ describe("ResultsBoard", () => {
     );
     // Nothing announced until a result is saved
     expect(screen.getByRole("status").textContent).toBe("");
+    expect(refresh).not.toHaveBeenCalled();
   });
 
   it("points out a match made stale by a correction, in the same announcement", async () => {

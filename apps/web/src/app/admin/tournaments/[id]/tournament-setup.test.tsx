@@ -1,7 +1,7 @@
 /**
  * @jest-environment jsdom
  */
-import { describe, expect, it } from "@jest/globals";
+import { describe, expect, it, jest } from "@jest/globals";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { Tournament, TournamentTeam } from "@/lib/api/models";
@@ -45,8 +45,9 @@ function setup(inTournament: TournamentTeam[], tournament = draft) {
     "GET /tournaments/t1/teams": [200, inTournament],
     "GET /teams": [200, teamsOf("Alpha", "Bravo", "Charlie", "Delta")],
   });
-  const view = render(<TournamentSetup id="t1" />);
-  return { fake, ui: userEvent.setup(), ...view };
+  const started = jest.fn<(slug: string) => Promise<void>>(async () => {});
+  const view = render(<TournamentSetup id="t1" onStarted={started} />);
+  return { fake, started, ui: userEvent.setup(), ...view };
 }
 
 const listed = () =>
@@ -153,7 +154,7 @@ describe("TournamentSetup", () => {
   });
 
   it("draws the seeds when seeding is automatic", async () => {
-    const { fake, ui } = setup([entry("Alpha"), entry("Bravo")]);
+    const { fake, started, ui } = setup([entry("Alpha"), entry("Bravo")]);
     fake.set("POST /tournaments/t1/bracket", [201, {}]);
     await ui.click(
       await screen.findByRole("button", { name: "Générer l'arbre" }),
@@ -168,6 +169,8 @@ describe("TournamentSetup", () => {
       seeding: "auto",
     });
     expect(fake.count("PUT /tournaments/t1/seeding")).toBe(0);
+    // Now public: its page and the list are refreshed for visitors
+    await waitFor(() => expect(started).toHaveBeenCalledWith("winter-cup"));
   });
 
   it("cancels the generation and returns to the button", async () => {

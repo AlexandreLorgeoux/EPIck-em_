@@ -1,6 +1,11 @@
 import { describe, expect, it } from "@jest/globals";
 import type { Bracket, BracketMatch, BracketSlot } from "@/lib/api/models";
-import { announceResult, matchStatus, roundName } from "./bracket-text";
+import {
+  announceResult,
+  championOf,
+  matchStatus,
+  roundName,
+} from "./bracket-text";
 
 const slot = (
   name: string | null,
@@ -100,5 +105,27 @@ describe("announceResult", () => {
     expect(announceResult(bracket(won, final), "Match 1")).toBe(
       "Alpha gagne Match 1 et passe en finale. Match 3 est à corriger : ses équipes ont changé.",
     );
+  });
+});
+
+describe("championOf", () => {
+  it("names the winner of the final, and nobody before it is played", () => {
+    const won = match(
+      "Match 1",
+      [slot("Alpha", { winner: true }), slot("Delta")],
+      {
+        state: "decided",
+      },
+    );
+    const open = match("Match 3", [slot("Alpha"), slot(null)]);
+    expect(championOf(bracket(won, open))).toBeNull();
+    const final = match(
+      "Match 3",
+      [slot("Alpha"), slot("Bravo", { winner: true })],
+      {
+        state: "decided",
+      },
+    );
+    expect(championOf(bracket(won, final))).toBe("Bravo");
   });
 });
