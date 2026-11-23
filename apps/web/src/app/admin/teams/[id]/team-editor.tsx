@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useState, type FormEvent } from "react";
-import { ConfirmAction, buttonClass } from "@/components/confirm-action";
+import { ConfirmAction } from "@/components/confirm-action";
+import { buttonClass } from "@/components/styles";
 import { controlClass } from "@/components/form-field";
 import { api } from "@/lib/api/client";
 import { isApiError } from "@/lib/api/errors";

@@ -10,8 +10,9 @@ export function TableView({
   busy,
 }: {
   bracket: Bracket;
-  onOpen: (match: BracketMatch, button: HTMLButtonElement) => void;
-  busy: boolean;
+  // Opens the result form of a match; left out, the view is read-only
+  onOpen?: (match: BracketMatch, button: HTMLButtonElement) => void;
+  busy?: boolean;
 }) {
   const rounds = bracket.rounds.length;
   return (
@@ -34,9 +35,11 @@ export function TableView({
                 </th>
               ),
             )}
-            <th scope="col" className="py-2">
-              <span className="sr-only">Action</span>
-            </th>
+            {onOpen && (
+              <th scope="col" className="py-2">
+                <span className="sr-only">Action</span>
+              </th>
+            )}
           </tr>
         </thead>
         <tbody>
@@ -60,13 +63,15 @@ export function TableView({
                     <TeamLabel slot={second} decided={decided} />
                   </td>
                   <td className="py-3 pr-4">{matchStatus(match)}</td>
-                  <td className="py-3">
-                    <MatchAction
-                      match={match}
-                      onOpen={onOpen}
-                      disabled={busy}
-                    />
-                  </td>
+                  {onOpen && (
+                    <td className="py-3">
+                      <MatchAction
+                        match={match}
+                        onOpen={onOpen}
+                        disabled={busy}
+                      />
+                    </td>
+                  )}
                 </tr>
               );
             }),

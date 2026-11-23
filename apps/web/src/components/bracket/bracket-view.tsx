@@ -10,8 +10,9 @@ export function BracketView({
   busy,
 }: {
   bracket: Bracket;
-  onOpen: (match: BracketMatch, button: HTMLButtonElement) => void;
-  busy: boolean;
+  // Opens the result form of a match; left out, the view is read-only
+  onOpen?: (match: BracketMatch, button: HTMLButtonElement) => void;
+  busy?: boolean;
 }) {
   const rounds = bracket.rounds.length;
   return (
@@ -59,11 +60,13 @@ export function BracketView({
                         </span>
                       )}
                     </p>
-                    <MatchAction
-                      match={match}
-                      onOpen={onOpen}
-                      disabled={busy}
-                    />
+                    {onOpen && (
+                      <MatchAction
+                        match={match}
+                        onOpen={onOpen}
+                        disabled={busy}
+                      />
+                    )}
                   </li>
                 );
               })}

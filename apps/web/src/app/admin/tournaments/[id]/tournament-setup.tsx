@@ -12,7 +12,7 @@ import type {
   TournamentTeam,
 } from "@/lib/api/models";
 import { routes } from "@/lib/routes";
-import { StatusBadge, formatDate } from "../tournament-status";
+import { StatusBadge, formatDate } from "@/components/tournament-status";
 
 const messageOf = (caught: unknown) =>
   isApiError(caught)

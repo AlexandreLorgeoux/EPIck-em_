@@ -7,18 +7,13 @@ import { isApiError } from "@/lib/api/errors";
 import type { Bracket, BracketMatch, Tournament } from "@/lib/api/models";
 import { explainMessage } from "@/lib/forms/explain";
 import { routes } from "@/lib/routes";
-import { StatusBadge } from "../../tournament-status";
-import { announceResult, needsAttention } from "./bracket-text";
-import { BracketView } from "./bracket-view";
+import { StatusBadge } from "@/components/tournament-status";
+import {
+  announceResult,
+  needsAttention,
+} from "@/components/bracket/bracket-text";
+import { BracketSwitcher } from "@/components/bracket/bracket-switcher";
 import { ResultForm } from "./result-form";
-import { TableView } from "./table-view";
-
-type View = "bracket" | "table";
-
-const views: { value: View; label: string }[] = [
-  { value: "bracket", label: "Arbre" },
-  { value: "table", label: "Tableau" },
-];
 
 // Enter and correct the results of a running tournament, from the bracket
 // or from the table of matches: both show the same data and open the same
@@ -26,7 +21,6 @@ const views: { value: View; label: string }[] = [
 export function ResultsBoard({ id }: { id: string }) {
   const [tournament, setTournament] = useState<Tournament | null>(null);
   const [bracket, setBracket] = useState<Bracket | null>(null);
-  const [view, setView] = useState<View>("bracket");
   const [open, setOpen] = useState<BracketMatch | null>(null);
   // Match whose button gets focus back once the form closes
   const returnTo = useRef<string | null>(null);
@@ -96,7 +90,6 @@ export function ResultsBoard({ id }: { id: string }) {
   }
 
   const toFix = bracket.rounds.flatMap((r) => r.matches).filter(needsAttention);
-  const Matches = view === "bracket" ? BracketView : TableView;
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-12">
@@ -127,38 +120,16 @@ export function ResultsBoard({ id }: { id: string }) {
         </p>
       )}
 
-      <div role="group" aria-label="Affichage" className="flex gap-2">
-        {views.map((option) => (
-          <button
-            key={option.value}
-            type="button"
-            aria-pressed={view === option.value}
-            onClick={() => setView(option.value)}
-            className={`min-h-11 rounded-md border-2 px-4 ${
-              view === option.value
-                ? "font-bold underline underline-offset-4"
-                : ""
-            }`}
-          >
-            {option.label}
-          </button>
-        ))}
-      </div>
-
-      {open && (
-        <ResultForm
-          key={open.id}
-          match={open}
-          onSaved={saved}
-          onCancel={close}
-        />
-      )}
-
-      <Matches
-        bracket={bracket}
-        busy={false}
-        onOpen={(match) => setOpen(match)}
-      />
+      <BracketSwitcher bracket={bracket} onOpen={(match) => setOpen(match)}>
+        {open && (
+          <ResultForm
+            key={open.id}
+            match={open}
+            onSaved={saved}
+            onCancel={close}
+          />
+        )}
+      </BracketSwitcher>
     </div>
   );
 }

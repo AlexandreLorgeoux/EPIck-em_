@@ -1,5 +1,5 @@
 import type { BracketMatch, BracketSlot } from "@/lib/api/models";
-import { buttonClass } from "@/components/confirm-action";
+import { buttonClass } from "@/components/styles";
 import { isPlayable } from "./bracket-text";
 
 // A team in a match, with its outcome written out: the symbol helps at a
