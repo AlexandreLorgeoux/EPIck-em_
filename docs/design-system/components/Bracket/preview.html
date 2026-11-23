@@ -1,0 +1,64 @@
+<!-- @dsCard group="Tournoi" height=620 subtitle="Arbre graphique et vue tableau équivalente" -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+  .br { padding: 24px; background: var(--surface); color: var(--ink); font-family: var(--font-body); display: grid; gap: 24px; }
+  .br h3 { margin: 0 0 12px; font: 700 22px/28px var(--font-display); font-stretch: 125%; }
+  .br__scroll { overflow-x: auto; }
+  .br svg { display: block; width: 100%; min-width: 560px; height: auto; }
+</style>
+<div class="br">
+  <section aria-labelledby="br-h">
+    <h3 id="br-h">Phase finale</h3>
+    <div class="br__scroll">
+      <svg viewBox="0 0 640 260" role="img" aria-labelledby="br-t br-d">
+        <title id="br-t">Arbre de la phase finale</title>
+        <desc id="br-d">Demi-finales : Marmottes bat Quokkas 2 à 1, Pixels bat Lutins 2 à 0. La finale Marmottes contre Pixels reste à jouer. Une vue tableau équivalente suit.</desc>
+
+        <!-- liens -->
+        <path class="oc-bracket__line" d="M178 30H208V74H178M208 52H240"/>
+        <path class="oc-bracket__line" d="M178 182H208V226H178M208 204H240"/>
+        <path class="oc-bracket__line" d="M410 52H440V204H410M440 128H470"/>
+
+        <!-- demi-finale 1 -->
+        <rect class="oc-bracket__box" x="8" y="12" width="170" height="36"/>
+        <circle class="oc-bracket__mark" cx="26" cy="30" r="9"/><path class="oc-bracket__tick" d="M22 30l3 3 5-6"/>
+        <text class="oc-bracket__text oc-bracket__text--win" x="44" y="35">Marmottes</text>
+        <text class="oc-bracket__text oc-bracket__text--win" x="168" y="35" text-anchor="end">2</text>
+        <rect class="oc-bracket__box" x="8" y="56" width="170" height="36"/>
+        <text class="oc-bracket__text" x="44" y="79">Quokkas</text>
+        <text class="oc-bracket__text" x="168" y="79" text-anchor="end">1</text>
+
+        <!-- demi-finale 2 -->
+        <rect class="oc-bracket__box" x="8" y="164" width="170" height="36"/>
+        <circle class="oc-bracket__mark" cx="26" cy="182" r="9"/><path class="oc-bracket__tick" d="M22 182l3 3 5-6"/>
+        <text class="oc-bracket__text oc-bracket__text--win" x="44" y="187">Pixels</text>
+        <text class="oc-bracket__text oc-bracket__text--win" x="168" y="187" text-anchor="end">2</text>
+        <rect class="oc-bracket__box" x="8" y="208" width="170" height="36"/>
+        <text class="oc-bracket__text" x="44" y="231">Lutins</text>
+        <text class="oc-bracket__text" x="168" y="231" text-anchor="end">0</text>
+
+        <!-- finale -->
+        <rect class="oc-bracket__box" x="240" y="34" width="170" height="36"/>
+        <text class="oc-bracket__text" x="258" y="57">Marmottes</text>
+        <text class="oc-bracket__text" x="400" y="57" text-anchor="end">–</text>
+        <rect class="oc-bracket__box" x="240" y="186" width="170" height="36"/>
+        <text class="oc-bracket__text" x="258" y="209">Pixels</text>
+        <text class="oc-bracket__text" x="400" y="209" text-anchor="end">–</text>
+
+        <!-- vainqueur -->
+        <rect class="oc-bracket__box" x="470" y="110" width="160" height="36"/>
+        <text class="oc-bracket__text" x="486" y="133">À déterminer</text>
+      </svg>
+    </div>
+  </section>
+
+  <table class="oc-table">
+    <caption>Vue tableau équivalente</caption>
+    <thead><tr><th scope="col">Tour</th><th scope="col">Match</th><th scope="col">Résultat</th><th scope="col">Vainqueur</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">Demi-finale 1</th><td>Marmottes contre Quokkas</td><td class="tabular">2 – 1</td><td>Marmottes</td></tr>
+      <tr><th scope="row">Demi-finale 2</th><td>Pixels contre Lutins</td><td class="tabular">2 – 0</td><td>Pixels</td></tr>
+      <tr><th scope="row">Finale</th><td>Marmottes contre Pixels</td><td>À jouer</td><td>À déterminer</td></tr>
+    </tbody>
+  </table>
+</div>

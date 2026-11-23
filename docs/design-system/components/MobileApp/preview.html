@@ -1,0 +1,71 @@
+<!-- @dsCard group="Mobile" height=860 subtitle="Écran Pronostics, 360 × 780 dp, avec barre d'onglets" -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+  .mb { padding: 24px; background: var(--surface-strong); display: grid; place-items: center; font-family: var(--font-body); color: var(--ink); }
+  .mb__phone { width: 360px; max-width: 100%; height: 780px; display: flex; flex-direction: column; background: var(--surface); border: 2px solid var(--border-ui); border-radius: 28px; overflow: hidden; }
+  .mb__bar { display: flex; align-items: center; gap: 12px; padding: 16px 16px 8px; }
+  .mb__bar h1 { margin: 0; font: 700 22px/28px var(--font-display); font-stretch: 125%; }
+  .mb__main { flex: 1; display: grid; align-content: start; gap: 12px; padding: 8px 16px 16px; overflow: auto; }
+  .mb__banner { display: flex; gap: 8px; align-items: flex-start; padding: 12px; border-radius: var(--radius-md); background: var(--surface-strong); font: 700 14px/20px var(--font-body); }
+  .mb__q { margin: 0; font: 700 16px/24px var(--font-body); }
+  .mb__list { display: grid; gap: 8px; border: 0; padding: 0; margin: 0; min-width: 0; }
+  .mb__list > legend { padding: 0; margin-bottom: 8px; font: 700 16px/24px var(--font-body); }
+  .mb .oc-pick { grid-template-columns: 1fr auto; align-items: center; }
+  .mb .oc-pick__meta, .mb .oc-pick__chosen { grid-column: auto; }
+  .mb .oc-tabbar { flex: none; }
+</style>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="oc-mark" viewBox="0 0 64 64"><path d="M7 11H19V34H45V11H57M32 34V50M21 55H43" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="32" cy="23" r="6" fill="#ffc83d" style="stroke: var(--ink); stroke-width: 2.5"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+  <symbol id="i-bracket" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h6v5H3M3 14h6v5H3M9 7.5h4v9H9M13 12h8"/></symbol>
+  <symbol id="i-pick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/></symbol>
+  <symbol id="i-group" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="3"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><circle cx="17" cy="10" r="2.4"/><path d="M16 14.5a4.5 4.5 0 0 1 5 4.5"/></symbol>
+</svg>
+<div class="mb">
+  <div class="mb__phone">
+    <header class="mb__bar">
+      <svg width="32" height="32" role="img" aria-label="Oracup"><use href="#oc-mark"/></svg>
+      <h1>Mes pronostics</h1>
+    </header>
+    <main class="mb__main">
+      <div class="mb__banner" role="status">
+        <svg class="oc-icon" aria-hidden="true"><use href="#i-lock"/></svg>
+        <span>Verrouillage dans 12 min : Marmottes contre Quokkas.</span>
+      </div>
+
+      <article class="oc-card" aria-labelledby="mb-m">
+        <div class="oc-match__head"><span>Demi-finale · Match 14</span><span class="oc-badge oc-badge--live"><span class="oc-live__dot" aria-hidden="true"></span><span class="overline">En direct</span></span></div>
+        <h2 id="mb-m" class="heading" style="margin: 0">Marmottes contre Quokkas</h2>
+        <fieldset class="mb__list">
+          <legend>Qui va gagner ?</legend>
+          <label class="oc-pick">
+            <input class="oc-pick__input" type="radio" name="mb14" checked>
+            <span class="oc-pick__name">Marmottes</span>
+            <span class="oc-pick__chosen"><svg class="oc-icon" aria-hidden="true"><use href="#i-check"/></svg>Ton choix</span>
+          </label>
+          <label class="oc-pick">
+            <input class="oc-pick__input" type="radio" name="mb14">
+            <span class="oc-pick__name">Quokkas</span>
+          </label>
+        </fieldset>
+      </article>
+
+      <article class="oc-card" aria-labelledby="mb-q">
+        <h2 id="mb-q" class="mb__q">Pick'em : combien de matchs en manche décisive ?</h2>
+        <fieldset class="mb__list">
+          <legend class="oc-field__hint" style="font-weight: 400">Réponse ouverte jusqu'à 20:30</legend>
+          <label class="oc-pick"><input class="oc-pick__input" type="radio" name="mbq"><span class="oc-pick__name">0 ou 1</span></label>
+          <label class="oc-pick"><input class="oc-pick__input" type="radio" name="mbq" checked><span class="oc-pick__name">2 ou 3</span><span class="oc-pick__chosen"><svg class="oc-icon" aria-hidden="true"><use href="#i-check"/></svg>Ton choix</span></label>
+        </fieldset>
+      </article>
+
+      <button class="oc-btn oc-btn--primary oc-btn--lg" type="button">Valider mes choix</button>
+    </main>
+    <nav class="oc-tabbar" aria-label="Navigation principale">
+      <a class="oc-tab" href="#"><svg class="oc-icon" aria-hidden="true"><use href="#i-bracket"/></svg>Tournois</a>
+      <a class="oc-tab" href="#" aria-current="page"><svg class="oc-icon" aria-hidden="true"><use href="#i-pick"/></svg>Pronostics</a>
+      <a class="oc-tab" href="#"><svg class="oc-icon" aria-hidden="true"><use href="#i-group"/></svg>Groupes</a>
+    </nav>
+  </div>
+</div>

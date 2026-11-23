@@ -1,0 +1,63 @@
+<!-- @dsCard group="Dashboard" width=1280 height=720 subtitle="Écran projeté en salle de LAN, thème sombre, 1280 × 720" -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+  .db { width: 1280px; height: 720px; box-sizing: border-box; padding: 40px 48px; background: var(--surface); color: var(--ink); font-family: var(--font-body); display: grid; grid-template-rows: auto 1fr auto; gap: 24px; overflow: hidden; }
+  .db__top { display: flex; align-items: center; gap: 20px; }
+  .db__top h1 { margin: 0; flex: 1; }
+  .db__main { display: grid; grid-template-columns: 1.35fr 1fr; gap: 32px; min-height: 0; }
+  .db__panel { background: var(--surface-raised); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 32px; display: grid; align-content: start; gap: 20px; min-width: 0; }
+  .db__meta { margin: 0; color: var(--ink-soft); }
+  .db__score { display: grid; grid-template-columns: 1fr auto 1fr; align-items: end; gap: 16px; }
+  .db__team { display: grid; gap: 4px; justify-items: center; min-width: 0; }
+  .db__team .display { margin: 0; }
+  .db__dash { color: var(--ink-soft); padding-bottom: 36px; }
+  .db__meter { height: 20px; border-radius: var(--radius-pill); background: var(--surface-strong); overflow: hidden; }
+  .db__meter > span { display: block; height: 100%; background: var(--brand); }
+  .db__split { display: flex; justify-content: space-between; gap: 16px; }
+  .db__rank { list-style: none; margin: 0; padding: 0; display: grid; }
+  .db__rank li { display: grid; grid-template-columns: 56px 1fr auto; align-items: center; min-height: 64px; border-bottom: 1px solid var(--line); }
+  .db__rank li:last-child { border-bottom: 0; }
+  .db__pos { font: 800 32px/1 var(--font-display); font-stretch: 125%; color: var(--brand); }
+  .db__foot { display: flex; align-items: center; gap: 16px; }
+  .db .oc-badge { font-size: 24px; line-height: 32px; min-height: 44px; padding: 4px 20px; }
+  .db .oc-live__dot { width: 16px; height: 16px; }
+</style>
+<div class="db" data-theme="dark">
+  <header class="db__top">
+    <svg width="56" height="56" viewBox="0 0 64 64" role="img" aria-label="Oracup"><path d="M7 11H19V34H45V11H57M32 34V50M21 55H43" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="32" cy="23" r="6" fill="#ffc83d"/></svg>
+    <h1 class="display">Coupe de la Rentrée</h1>
+    <span class="oc-badge oc-badge--live"><span class="oc-live__dot" aria-hidden="true"></span><span class="overline">En direct</span></span>
+  </header>
+
+  <div class="db__main">
+    <section class="db__panel" aria-labelledby="db-m">
+      <p id="db-m" class="dash-body db__meta">Demi-finale · Match 14 · Table 3</p>
+      <div class="db__score" role="group" aria-label="Score : Marmottes 2, Quokkas 1">
+        <div class="db__team"><span class="dash-score">2</span><h2 class="display">Marmottes</h2></div>
+        <span class="dash-score db__dash" aria-hidden="true">–</span>
+        <div class="db__team"><span class="dash-score">1</span><h2 class="display">Quokkas</h2></div>
+      </div>
+      <div>
+        <div class="db__meter" role="img" aria-label="72 % du public pronostique Marmottes"><span style="width: 72%"></span></div>
+        <div class="db__split dash-body" style="margin-top: 12px"><span><strong>72 %</strong> Marmottes</span><span>Quokkas <strong>28 %</strong></span></div>
+      </div>
+      <p class="dash-body db__meta tabular" style="margin: 0">1 284 pronostics reçus sur ce match</p>
+    </section>
+
+    <section class="db__panel" aria-labelledby="db-r">
+      <h2 id="db-r" class="dash-body" style="margin: 0; font-weight: 700">Classement des pronostiqueurs</h2>
+      <ol class="db__rank dash-body">
+        <li><span class="db__pos">1</span><span>Tamago</span><span class="tabular"><strong>1 240</strong> pts</span></li>
+        <li><span class="db__pos">2</span><span>Kyra</span><span class="tabular"><strong>1 180</strong> pts</span></li>
+        <li><span class="db__pos">3</span><span>Nox</span><span class="tabular"><strong>1 150</strong> pts</span></li>
+        <li><span class="db__pos">4</span><span>Mel</span><span class="tabular"><strong>1 090</strong> pts</span></li>
+        <li><span class="db__pos">5</span><span>Bastien</span><span class="tabular"><strong>1 020</strong> pts</span></li>
+      </ol>
+    </section>
+  </div>
+
+  <footer class="db__foot dash-body">
+    <span class="oc-badge oc-badge--soon" style="font-size: 24px"><span class="overline">Ensuite</span></span>
+    <span>21:15 · Pixels contre Lutins · Table 1</span>
+  </footer>
+</div>

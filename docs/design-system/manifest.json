@@ -1,0 +1,156 @@
+{
+  "manifestVersion": 3,
+  "name": "Oracup",
+  "namespace": "Oracup",
+  "files": [
+    "assets/Icons/README.md",
+    "assets/Logos/README.md",
+    "components/Bracket/README.md",
+    "components/Controls/README.md",
+    "components/LiveDashboard/README.md",
+    "components/Logo/README.md",
+    "components/MatchCard/README.md",
+    "components/MobileApp/README.md",
+    "components/StatusBadge/README.md",
+    "components/bundle.css",
+    "tokens.css"
+  ],
+  "libraries": [],
+  "components": [
+    {
+      "name": "Bracket",
+      "group": "Tournoi",
+      "summary": "L'arbre de tournoi se dessine en SVG, toujours accompagné d'une vue tableau équivalente."
+    },
+    {
+      "name": "Controls",
+      "group": "Contrôles",
+      "summary": "Les boutons et champs de saisie Oracup, avec leurs états par défaut, de focus, désactivé et d'erreur."
+    },
+    {
+      "name": "LiveDashboard",
+      "group": "Dashboard",
+      "summary": "Le dashboard en direct se projette en plein écran dans une salle de LAN, en thème sombre, avec le match en cours, la répartition du public et le classement."
+    },
+    {
+      "name": "Logo",
+      "group": "Identité",
+      "summary": "Le logo Oracup associe le symbole de la coupe et le nom composé en texte, sur fond clair, sombre ou de marque."
+    },
+    {
+      "name": "MatchCard",
+      "group": "Pronostics",
+      "summary": "La carte de match permet de pronostiquer un vainqueur, puis affiche le pronostic verrouillé et son résultat."
+    },
+    {
+      "name": "MobileApp",
+      "group": "Mobile",
+      "summary": "L'écran mobile Pronostics montre le verrouillage imminent, un match en direct, une question Pick'em et la barre d'onglets."
+    },
+    {
+      "name": "StatusBadge",
+      "group": "Statuts",
+      "summary": "Le badge de statut annonce un état (Juste, Faux, En direct, Verrouillé, À venir) par une icône et un mot, jamais par la couleur seule."
+    }
+  ],
+  "assetGroups": [
+    {
+      "name": "Logos",
+      "tile": "l",
+      "order": [
+        "oracup-mark.svg",
+        "oracup-mark-dark.svg",
+        "oracup-app-icon.svg"
+      ],
+      "files": [
+        {
+          "path": "assets/Logos/oracup-mark.svg",
+          "id": "3c179cda612a60f562e49a877296e43d"
+        },
+        {
+          "path": "assets/Logos/oracup-mark-dark.svg",
+          "id": "cbea26e485b4d07e97a78eb36eafeea5"
+        },
+        {
+          "path": "assets/Logos/oracup-app-icon.svg",
+          "id": "46d2668290b0d023d580d204e3fbbd15"
+        }
+      ]
+    },
+    {
+      "name": "Icons",
+      "tile": "s",
+      "order": [
+        "icon-check.svg",
+        "icon-close.svg",
+        "icon-lock.svg",
+        "icon-live.svg"
+      ],
+      "files": [
+        {
+          "path": "assets/Icons/icon-check.svg",
+          "id": "99d51f3aa9fba27983b5dfafce4633aa"
+        },
+        {
+          "path": "assets/Icons/icon-close.svg",
+          "id": "b2d29fc609cb5a036eb04c96acf014ea"
+        },
+        {
+          "path": "assets/Icons/icon-lock.svg",
+          "id": "2577d8e15098aafa4eb5bce0e8e0fe0f"
+        },
+        {
+          "path": "assets/Icons/icon-live.svg",
+          "id": "74db0a613aeb0fc775e9dd44301c82ed"
+        }
+      ]
+    }
+  ],
+  "storage": {
+    "files": {
+      "assets/Icons/icon-check.svg": {
+        "store": "blob",
+        "id": "99d51f3aa9fba27983b5dfafce4633aa",
+        "bytes": 229,
+        "type": "image/svg+xml"
+      },
+      "assets/Icons/icon-close.svg": {
+        "store": "blob",
+        "id": "b2d29fc609cb5a036eb04c96acf014ea",
+        "bytes": 226,
+        "type": "image/svg+xml"
+      },
+      "assets/Icons/icon-live.svg": {
+        "store": "blob",
+        "id": "74db0a613aeb0fc775e9dd44301c82ed",
+        "bytes": 322,
+        "type": "image/svg+xml"
+      },
+      "assets/Icons/icon-lock.svg": {
+        "store": "blob",
+        "id": "2577d8e15098aafa4eb5bce0e8e0fe0f",
+        "bytes": 291,
+        "type": "image/svg+xml"
+      },
+      "assets/Logos/oracup-app-icon.svg": {
+        "store": "blob",
+        "id": "46d2668290b0d023d580d204e3fbbd15",
+        "bytes": 429,
+        "type": "image/svg+xml"
+      },
+      "assets/Logos/oracup-mark-dark.svg": {
+        "store": "blob",
+        "id": "cbea26e485b4d07e97a78eb36eafeea5",
+        "bytes": 307,
+        "type": "image/svg+xml"
+      },
+      "assets/Logos/oracup-mark.svg": {
+        "store": "blob",
+        "id": "3c179cda612a60f562e49a877296e43d",
+        "bytes": 343,
+        "type": "image/svg+xml"
+      }
+    },
+    "blobBytesUsed": 2147
+  }
+}

@@ -1,0 +1,36 @@
+<!-- @dsCard group="Statuts" height=300 subtitle="Chaque état porte une icône et un mot, dans les deux thèmes" -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+  .sb { padding: 24px; background: var(--surface); color: var(--ink); font-family: var(--font-body); display: grid; gap: 16px; }
+  .sb__panel { padding: 16px; border-radius: var(--radius-md); background: var(--surface-raised); border: 1px solid var(--line); display: grid; gap: 12px; }
+  .sb__panel h3 { margin: 0; font: 700 14px/20px var(--font-body); color: var(--ink-soft); }
+  .sb__row { display: flex; flex-wrap: wrap; gap: 12px; }
+</style>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></symbol>
+</svg>
+<div class="sb">
+  <div class="sb__panel">
+    <h3>Thème clair</h3>
+    <div class="sb__row">
+      <span class="oc-badge oc-badge--win"><svg class="oc-icon" aria-hidden="true"><use href="#i-check"/></svg>Juste</span>
+      <span class="oc-badge oc-badge--loss"><svg class="oc-icon" aria-hidden="true"><use href="#i-close"/></svg>Faux</span>
+      <span class="oc-badge oc-badge--live"><span class="oc-live__dot" aria-hidden="true"></span><span class="overline">En direct</span></span>
+      <span class="oc-badge oc-badge--locked"><svg class="oc-icon" aria-hidden="true"><use href="#i-lock"/></svg>Verrouillé</span>
+      <span class="oc-badge oc-badge--soon"><svg class="oc-icon" aria-hidden="true"><use href="#i-clock"/></svg>À venir</span>
+    </div>
+  </div>
+  <div class="sb__panel" data-theme="dark" style="background: var(--surface-raised); color: var(--ink)">
+    <h3>Thème sombre</h3>
+    <div class="sb__row">
+      <span class="oc-badge oc-badge--win"><svg class="oc-icon" aria-hidden="true"><use href="#i-check"/></svg>Juste</span>
+      <span class="oc-badge oc-badge--loss"><svg class="oc-icon" aria-hidden="true"><use href="#i-close"/></svg>Faux</span>
+      <span class="oc-badge oc-badge--live"><span class="oc-live__dot" aria-hidden="true"></span><span class="overline">En direct</span></span>
+      <span class="oc-badge oc-badge--locked"><svg class="oc-icon" aria-hidden="true"><use href="#i-lock"/></svg>Verrouillé</span>
+      <span class="oc-badge oc-badge--soon"><svg class="oc-icon" aria-hidden="true"><use href="#i-clock"/></svg>À venir</span>
+    </div>
+  </div>
+</div>

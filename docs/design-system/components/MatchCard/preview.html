@@ -1,0 +1,77 @@
+<!-- @dsCard group="Pronostics" height=480 subtitle="Pronostic ouvert, verrouillé et résolu" -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+  .mc { padding: 24px; background: var(--surface); color: var(--ink); font-family: var(--font-body); display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 24px; align-items: start; }
+  .mc__title { margin: 0; font: 700 22px/28px var(--font-display); font-stretch: 125%; }
+  .mc__note { margin: 0; font: 400 14px/20px var(--font-body); color: var(--ink-soft); }
+  .mc__foot { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+</style>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></symbol>
+</svg>
+<div class="mc">
+
+  <article class="oc-card" aria-labelledby="mc1">
+    <div class="oc-match__head">
+      <span>Demi-finale · Match 14</span>
+      <span class="oc-badge oc-badge--soon"><svg class="oc-icon" aria-hidden="true"><use href="#i-clock"/></svg>Ferme dans 12 min</span>
+    </div>
+    <h3 id="mc1" class="mc__title">Marmottes contre Quokkas</h3>
+    <fieldset class="oc-picks">
+      <legend>Qui va gagner ?</legend>
+      <label class="oc-pick">
+        <input class="oc-pick__input" type="radio" name="m14" value="marmottes" checked>
+        <span class="oc-pick__name">Marmottes</span>
+        <span class="oc-pick__meta">72 % du public</span>
+        <span class="oc-meter" aria-hidden="true"><span style="width: 72%"></span></span>
+        <span class="oc-pick__chosen"><svg class="oc-icon" aria-hidden="true"><use href="#i-check"/></svg>Ton choix</span>
+      </label>
+      <label class="oc-pick">
+        <input class="oc-pick__input" type="radio" name="m14" value="quokkas">
+        <span class="oc-pick__name">Quokkas</span>
+        <span class="oc-pick__meta">28 % du public</span>
+        <span class="oc-meter" aria-hidden="true"><span style="width: 28%"></span></span>
+        <span class="oc-pick__chosen"><svg class="oc-icon" aria-hidden="true"><use href="#i-check"/></svg>Ton choix</span>
+      </label>
+    </fieldset>
+    <div class="mc__foot">
+      <button class="oc-btn oc-btn--primary" type="button">Valider mon pronostic</button>
+      <p class="mc__note">Modifiable jusqu'au début du match.</p>
+    </div>
+  </article>
+
+  <article class="oc-card" aria-labelledby="mc2">
+    <div class="oc-match__head">
+      <span>Demi-finale · Match 15</span>
+      <span class="oc-badge oc-badge--locked"><svg class="oc-icon" aria-hidden="true"><use href="#i-lock"/></svg>Verrouillé</span>
+    </div>
+    <h3 id="mc2" class="mc__title">Pixels contre Lutins</h3>
+    <fieldset class="oc-picks" disabled>
+      <legend>Ton pronostic</legend>
+      <label class="oc-pick">
+        <input class="oc-pick__input" type="radio" name="m15" value="pixels" checked disabled>
+        <span class="oc-pick__name">Pixels</span>
+        <span class="oc-pick__meta">64 % du public</span>
+        <span class="oc-pick__chosen"><svg class="oc-icon" aria-hidden="true"><use href="#i-check"/></svg>Ton choix</span>
+      </label>
+      <label class="oc-pick">
+        <input class="oc-pick__input" type="radio" name="m15" value="lutins" disabled>
+        <span class="oc-pick__name">Lutins</span>
+        <span class="oc-pick__meta">36 % du public</span>
+      </label>
+    </fieldset>
+    <p class="mc__note">Le match a commencé à 20:30. Ton pronostic ne peut plus changer.</p>
+  </article>
+
+  <article class="oc-card" aria-labelledby="mc3">
+    <div class="oc-match__head">
+      <span>Quart de finale · Match 9</span>
+      <span class="oc-badge oc-badge--win"><svg class="oc-icon" aria-hidden="true"><use href="#i-check"/></svg>Juste · +30 points</span>
+    </div>
+    <h3 id="mc3" class="mc__title">Marmottes 2 – 0 Chouettes</h3>
+    <p class="mc__note">Tu avais choisi Marmottes. Résultat saisi par l'administrateur à 19:42.</p>
+  </article>
+
+</div>
