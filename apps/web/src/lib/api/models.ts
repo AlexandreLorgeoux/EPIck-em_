@@ -66,3 +66,31 @@ export interface TournamentTeam {
 }
 
 export type SeedingMode = "manual" | "auto";
+
+// GET /tournaments/:id/bracket
+export type MatchState = "pending" | "decided" | "void" | "stale" | "conflict";
+
+export interface BracketSlot {
+  position: number;
+  // open: team not known yet; bye: no opponent
+  state: "open" | "assigned" | "bye";
+  seed: number | null;
+  team: { id: string; name: string; tag: string | null } | null;
+  score: number | null;
+  winner: boolean;
+}
+
+export interface BracketMatch {
+  id: string;
+  label: string;
+  position: number;
+  state: MatchState;
+  // False for a bye: decided without being played
+  hasResult: boolean;
+  slots: BracketSlot[];
+}
+
+export interface Bracket {
+  stage: { id: string; name: string; format: string; seeding: SeedingMode };
+  rounds: { round: number; matches: BracketMatch[] }[];
+}
