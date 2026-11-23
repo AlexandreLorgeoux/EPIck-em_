@@ -230,11 +230,15 @@ The best seeds meet as late as possible (1 plays 8, 4 plays 5...), and byes go t
 
 `POST /matches/:id/result` (ticket #24), admin only, takes `{ "scores": [3, 1], "winnerSlot": 1 }`, scores in slot order. In one transaction:
 
-1. Checks that both teams are known, the match is not a bye and has no result yet, the score is not a tie and the winner has the higher score.
-2. Saves the raw result: `match_result` version 1 with `declared_winner_slot` and `reported_by`, the two teams in `match_result_entrant`, and the score as one `round` with its `round_score` rows. These tables are append-only: a correction will be version 2, with a reason.
+1. Checks that both teams are known, the match is not a bye, the score is not a tie and the winner has the higher score.
+2. Saves the raw result: a `match_result` version with `declared_winner_slot` and `reported_by`, the two teams in `match_result_entrant`, and the score as one `round` with its `round_score` rows.
 3. Runs layer 1 again for the whole tournament and replaces its `slot_assignment` and `match_outcome` rows, so the winner fills the next match.
 
-A PostgreSQL advisory lock on the tournament serializes these writes: two results entered at the same time for one match give one `201` and one `409`.
+**Corrections** (ticket #27) use the same endpoint with a `reason`, required once the match has a result. The new row is version n+1, with `supersedes_id` pointing to the previous one, which stays: these tables are append-only.
+
+When a correction changes who plays a later match that already has a result, that result names teams that no longer play it. Its `match_outcome` becomes `stale` (section 6.4 of the data model): nobody goes through and the tournament is not finished until an admin corrects that match too. `GET /tournaments/:id/bracket` gives each match its `state` and `hasResult`.
+
+A PostgreSQL advisory lock on the tournament serializes these writes: two results entered at the same time for one match give one `201`, and one `400` asking for a reason, since the match then has a result.
 
 Layer 1 runs inside the request for now, because the bracket is small and nothing else depends on it yet. It moves to the recompute job (section 7 of the data model) with the outbox tables. When the final has a result, every match is decided and the tournament status becomes `finished`.
 
