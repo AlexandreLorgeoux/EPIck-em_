@@ -52,6 +52,30 @@ const fieldRules: {
       `«${label}» n'est pas une date valide : choisis un jour et une heure.`,
   },
   {
+    pattern: /^each score must be (a whole number|0 or more)/,
+    explain: () =>
+      "Les scores doivent être des nombres entiers, 0 ou plus : corrige le score de chaque équipe.",
+  },
+  {
+    pattern: /^A match cannot end in a tie/,
+    explain: () =>
+      "Un match ne peut pas finir à égalité : saisis le score qui a départagé les équipes.",
+  },
+  {
+    pattern: /^winnerSlot must be 1 or 2/,
+    explain: () => "Choisis l'équipe qui a gagné.",
+  },
+  {
+    pattern: /^winnerSlot must be the slot with the higher score/,
+    explain: () =>
+      "Le vainqueur doit avoir le plus haut score : vérifie que les scores ne sont pas inversés.",
+  },
+  {
+    pattern: /^reason is required to correct/,
+    explain: () =>
+      "Ce match a déjà un résultat : explique en quelques mots pourquoi il change.",
+  },
+  {
     pattern: /^\w+ must be a valid UUID/,
     explain: (_, label) =>
       `«${label}» n'est pas valide : choisis une option de la liste.`,
@@ -100,6 +124,16 @@ const messageRules: [RegExp, (match: RegExpMatchArray) => string][] = [
     /^This tournament is (running|finished): only a draft tournament can be/,
     ([, status]) =>
       `Ce tournoi est ${status === "running" ? "en cours" : "terminé"} : seul un brouillon peut encore changer.`,
+  ],
+  [
+    /^(.+) has a bye: there is no result to enter$/,
+    ([, match]) =>
+      `${match} est un match sans adversaire : il n'a pas de résultat.`,
+  ],
+  [
+    /^(.+) cannot be played yet: both teams are not known$/,
+    ([, match]) =>
+      `${match} ne peut pas encore être joué : ses deux équipes ne sont pas connues.`,
   ],
   [
     /^Cannot reach the server/,

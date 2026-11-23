@@ -21,10 +21,14 @@ export function useApiForm(labels: Record<string, string>) {
   const [pending, setPending] = useState(false);
 
   useEffect(() => {
-    document
+    const invalid = document
       .getElementById(id)
-      ?.querySelector<HTMLElement>('[aria-invalid="true"]')
-      ?.focus();
+      ?.querySelector<HTMLElement>('[aria-invalid="true"]');
+    // A group (radio buttons) is marked as a whole: focus its first control
+    const control = invalid?.matches("input, select, textarea")
+      ? invalid
+      : invalid?.querySelector<HTMLElement>("input, select, textarea");
+    control?.focus();
   }, [id, fieldErrors]);
 
   const onSubmit =

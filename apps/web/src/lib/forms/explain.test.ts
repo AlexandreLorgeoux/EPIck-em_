@@ -56,6 +56,36 @@ describe("explainFieldError", () => {
     ).toBe("«Début» n'est pas une date valide : choisis un jour et une heure.");
   });
 
+  it("explains the result form errors", () => {
+    expect(
+      explainFieldError(
+        "scores",
+        "A match cannot end in a tie: enter the score that decided it",
+        { labels },
+      ),
+    ).toBe(
+      "Un match ne peut pas finir à égalité : saisis le score qui a départagé les équipes.",
+    );
+    expect(
+      explainFieldError(
+        "winnerSlot",
+        "winnerSlot must be the slot with the higher score",
+        { labels },
+      ),
+    ).toBe(
+      "Le vainqueur doit avoir le plus haut score : vérifie que les scores ne sont pas inversés.",
+    );
+    expect(
+      explainFieldError(
+        "reason",
+        "reason is required to correct Match 3: say why the result changes",
+        { labels },
+      ),
+    ).toBe(
+      "Ce match a déjà un résultat : explique en quelques mots pourquoi il change.",
+    );
+  });
+
   it("keeps a message it has no rule for", () => {
     expect(explainFieldError("name", "something new", { labels })).toBe(
       "something new",
@@ -76,6 +106,10 @@ describe("explainMessage", () => {
     [
       "Kestrel already belongs to Marmottes: remove them from that team first",
       "Kestrel fait déjà partie de Marmottes : retire-le de cette équipe d'abord.",
+    ],
+    [
+      "Match 4 cannot be played yet: both teams are not known",
+      "Match 4 ne peut pas encore être joué : ses deux équipes ne sont pas connues.",
     ],
     [
       "This tournament is running: only a draft tournament can be started",
