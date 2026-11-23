@@ -1,9 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
-
-export const buttonClass =
-  "min-h-11 rounded-md border-2 px-4 font-bold disabled:opacity-50";
+import { buttonClass } from "./styles";
 
 /**
  * A button that asks for confirmation in place before an action that

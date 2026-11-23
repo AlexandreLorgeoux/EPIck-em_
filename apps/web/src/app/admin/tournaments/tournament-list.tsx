@@ -6,7 +6,7 @@ import { api } from "@/lib/api/client";
 import { isApiError } from "@/lib/api/errors";
 import type { Tournament } from "@/lib/api/models";
 import { routes } from "@/lib/routes";
-import { StatusBadge, formatDate } from "./tournament-status";
+import { StatusBadge, formatDate } from "@/components/tournament-status";
 
 export function TournamentList() {
   const [tournaments, setTournaments] = useState<Tournament[] | null>(null);

@@ -1,7 +1,7 @@
 "use client";
 
 import { FormField, controlClass } from "@/components/form-field";
-import { buttonClass } from "@/components/confirm-action";
+import { buttonClass } from "@/components/styles";
 import type { Player } from "@/lib/api/models";
 import { useApiForm, type FormValues } from "@/lib/forms/use-api-form";
 

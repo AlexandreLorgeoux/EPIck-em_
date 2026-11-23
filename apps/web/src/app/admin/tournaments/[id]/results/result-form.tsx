@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef } from "react";
-import { buttonClass } from "@/components/confirm-action";
+import { buttonClass } from "@/components/styles";
 import { controlClass } from "@/components/form-field";
 import { api } from "@/lib/api/client";
 import type { Bracket, BracketMatch } from "@/lib/api/models";

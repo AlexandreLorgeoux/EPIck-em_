@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormField, controlClass } from "@/components/form-field";
-import { buttonClass } from "@/components/confirm-action";
+import { buttonClass } from "@/components/styles";
 import { api } from "@/lib/api/client";
 import type { Tournament } from "@/lib/api/models";
 import { useApiForm } from "@/lib/forms/use-api-form";
