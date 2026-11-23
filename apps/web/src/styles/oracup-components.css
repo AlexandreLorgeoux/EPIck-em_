@@ -1,0 +1,347 @@
+/* Copy of docs/design-system/components/bundle.css (Oracup). */
+/* Oracup : styles des composants, indépendants du framework. Dépend de tokens.css. */
+
+:where(
+  .oc-btn,
+  .oc-field__input,
+  .oc-pick,
+  .oc-tab,
+  .oc-badge,
+  .oc-card,
+  .oc-meter
+) {
+  box-sizing: border-box;
+}
+
+.display-xl,
+.display,
+.title,
+.heading,
+.score,
+.dash-title,
+.dash-score {
+  font-stretch: 125%;
+}
+.score,
+.dash-score,
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+.overline {
+  text-transform: uppercase;
+}
+
+/* Focus : trait plein de 3px décalé de 2px, sur tous les contrôles. */
+:where(.oc-btn, .oc-field__input, .oc-pick, .oc-tab, a):focus-visible {
+  outline: var(--stroke-focus) solid var(--focus);
+  outline-offset: 2px;
+}
+.oc-pick:has(.oc-pick__input:focus-visible) {
+  outline: var(--stroke-focus) solid var(--focus);
+  outline-offset: 2px;
+}
+
+.oc-icon {
+  width: 20px;
+  height: 20px;
+  flex: none;
+}
+
+/* Boutons */
+.oc-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--target-web);
+  padding: 0 var(--space-4);
+  border: var(--stroke-control) solid transparent;
+  border-radius: var(--radius-md);
+  font: 700 16px/24px var(--font-body);
+  cursor: pointer;
+  text-decoration: none;
+}
+.oc-btn--lg {
+  min-height: var(--target-mobile);
+  padding: 0 var(--space-6);
+}
+.oc-btn--primary {
+  background: var(--brand);
+  color: var(--on-brand);
+}
+.oc-btn--primary:hover {
+  background: var(--brand-hover);
+}
+.oc-btn--secondary {
+  background: transparent;
+  color: var(--ink);
+  border-color: var(--border-ui);
+}
+.oc-btn--secondary:hover {
+  background: var(--surface-strong);
+}
+.oc-btn--danger {
+  background: var(--loss);
+  color: var(--on-loss);
+}
+.oc-btn[aria-disabled="true"],
+.oc-btn:disabled {
+  background: var(--surface-strong);
+  color: var(--ink-soft);
+  border: var(--stroke-control) dashed var(--border-ui);
+  cursor: not-allowed;
+}
+
+/* Champs */
+.oc-field {
+  display: grid;
+  gap: var(--space-1);
+}
+.oc-field__label {
+  font: 700 14px/20px var(--font-body);
+  color: var(--ink);
+}
+.oc-field__hint {
+  font: 400 14px/20px var(--font-body);
+  color: var(--ink-soft);
+}
+.oc-field__input {
+  min-height: var(--target-web);
+  padding: 0 var(--space-3);
+  border: var(--stroke-control) solid var(--border-ui);
+  border-radius: var(--radius-sm);
+  background: var(--surface-raised);
+  color: var(--ink);
+  font: 400 16px/24px var(--font-body);
+}
+.oc-field__input[aria-invalid="true"] {
+  border-color: var(--loss);
+}
+.oc-field__error {
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-start;
+  color: var(--loss);
+  font: 700 14px/20px var(--font-body);
+}
+
+/* Badges de statut : toujours une icône et un mot. */
+.oc-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  padding: 2px 10px;
+  border: var(--stroke-control) solid currentColor;
+  border-radius: var(--radius-pill);
+  font: 700 14px/20px var(--font-body);
+  white-space: nowrap;
+}
+.oc-badge--win {
+  color: var(--brand);
+}
+.oc-badge--loss {
+  color: var(--loss);
+}
+.oc-badge--locked {
+  color: var(--ink-soft);
+}
+.oc-badge--soon {
+  color: var(--ink);
+}
+.oc-badge--live {
+  background: var(--signal);
+  color: var(--on-signal);
+  border-color: var(--signal);
+}
+.oc-live__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .oc-badge--live .oc-live__dot {
+    animation: oc-pulse 1.6s ease-out infinite;
+  }
+}
+@keyframes oc-pulse {
+  0% {
+    box-shadow: 0 0 0 0 currentColor;
+  }
+  70% {
+    box-shadow: 0 0 0 8px transparent;
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+/* Cartes et pronostic */
+.oc-card {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--surface-raised);
+  border: var(--stroke-hairline) solid var(--line);
+  border-radius: var(--radius-md);
+}
+.oc-match__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-2);
+  font: 400 14px/20px var(--font-body);
+  color: var(--ink-soft);
+}
+.oc-picks {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.oc-picks > legend {
+  padding: 0;
+  margin-bottom: var(--space-2);
+  font: 700 16px/24px var(--font-body);
+  color: var(--ink);
+}
+.oc-pick {
+  position: relative;
+  display: grid;
+  gap: var(--space-1);
+  align-content: start;
+  min-height: var(--target-mobile);
+  padding: var(--space-3);
+  border: var(--stroke-control) solid var(--border-ui);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+  color: var(--ink);
+  cursor: pointer;
+}
+.oc-pick__input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: inherit;
+}
+.oc-pick__name {
+  font: 700 16px/24px var(--font-body);
+}
+.oc-pick__meta {
+  font: 400 14px/20px var(--font-body);
+  color: var(--ink-soft);
+}
+.oc-pick__chosen {
+  display: none;
+  align-items: center;
+  gap: var(--space-1);
+  font: 700 14px/20px var(--font-body);
+  color: var(--brand);
+}
+.oc-pick:has(.oc-pick__input:checked) {
+  border-color: var(--brand);
+  background: var(--surface-strong);
+}
+.oc-pick:has(.oc-pick__input:checked) .oc-pick__chosen {
+  display: inline-flex;
+}
+.oc-pick:has(.oc-pick__input:disabled) {
+  cursor: not-allowed;
+  background: var(--surface-strong);
+}
+.oc-meter {
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-strong);
+  overflow: hidden;
+}
+.oc-meter > span {
+  display: block;
+  height: 100%;
+  background: var(--brand);
+}
+.oc-pick:has(.oc-pick__input:checked) .oc-meter {
+  background: var(--surface-raised);
+}
+
+/* Barre d'onglets mobile */
+.oc-tabbar {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  background: var(--surface-raised);
+  border-top: var(--stroke-hairline) solid var(--line);
+}
+.oc-tab {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 2px;
+  min-height: var(--target-mobile);
+  padding: var(--space-2);
+  font: 700 14px/18px var(--font-body);
+  color: var(--ink-soft);
+  text-decoration: none;
+}
+.oc-tab[aria-current="page"] {
+  color: var(--brand);
+  box-shadow: inset 0 3px 0 var(--brand);
+}
+
+/* Arbre de tournoi (SVG) */
+.oc-bracket__line {
+  fill: none;
+  stroke: var(--border-ui);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.oc-bracket__box {
+  fill: var(--surface-raised);
+  stroke: var(--border-ui);
+  stroke-width: 2;
+  rx: var(--radius-sm);
+}
+.oc-bracket__text {
+  font: 400 14px var(--font-body);
+  fill: var(--ink);
+}
+.oc-bracket__text--win {
+  font-weight: 700;
+}
+.oc-bracket__mark {
+  fill: var(--brand);
+}
+.oc-bracket__tick {
+  fill: none;
+  stroke: var(--on-brand);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.oc-table {
+  border-collapse: collapse;
+  width: 100%;
+  font: 400 14px/20px var(--font-body);
+  color: var(--ink);
+}
+.oc-table caption {
+  text-align: left;
+  padding-bottom: var(--space-2);
+  font: 700 14px/20px var(--font-body);
+}
+.oc-table th,
+.oc-table td {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: var(--stroke-hairline) solid var(--line);
+  text-align: left;
+}
+.oc-table th {
+  color: var(--ink-soft);
+  font-weight: 700;
+}
