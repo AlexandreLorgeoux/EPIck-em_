@@ -181,10 +181,18 @@ export function TournamentSetup({ id }: { id: string }) {
       {error && <p role="alert">{error}</p>}
 
       {!draft && (
-        <p>
-          Le tournoi a démarré : les équipes et le seeding ne peuvent plus
-          changer.
-        </p>
+        <div className="flex flex-col gap-3">
+          <p>
+            Le tournoi a démarré : les équipes et le seeding ne peuvent plus
+            changer.
+          </p>
+          <Link
+            href={routes.admin.results(id)}
+            className="inline-flex min-h-11 items-center self-start rounded-md border-2 px-4 font-bold"
+          >
+            Saisir les résultats
+          </Link>
+        </div>
       )}
 
       <section aria-labelledby="teams-heading" className="flex flex-col gap-4">
