@@ -1,0 +1,40 @@
+<!-- @dsCard group="Identité" height=420 subtitle="Symbole, nom et icône d'application" -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+  .lg { padding: 24px; background: var(--surface); color: var(--ink); font-family: var(--font-body); }
+  .lg__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; }
+  .lg__tile { display: grid; place-items: center; min-height: 150px; padding: 24px; border-radius: var(--radius-md); border: 1px solid var(--line); }
+  .lg__lockup { display: flex; align-items: center; gap: 12px; }
+  .lg__mark { width: 56px; height: 56px; }
+  .lg__word { font-family: var(--font-display); font-stretch: 125%; font-weight: 800; font-size: 36px; line-height: 1; letter-spacing: -0.01em; }
+  .lg__icons { display: flex; align-items: flex-end; gap: 16px; }
+  .lg__icon { display: grid; place-items: center; background: var(--brand); color: var(--on-brand); border-radius: 22%; }
+  .lg__note { margin: 16px 0 0; font: 400 14px/20px var(--font-body); color: var(--ink-soft); max-width: 70ch; }
+</style>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="oc-mark" viewBox="0 0 64 64">
+    <path d="M7 11H19V34H45V11H57M32 34V50M21 55H43" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="32" cy="23" r="6" fill="#ffc83d" style="stroke: var(--dot-ring, transparent); stroke-width: 2.5"/>
+  </symbol>
+</svg>
+<div class="lg">
+  <div class="lg__grid">
+    <div class="lg__tile" style="background: var(--surface-raised); color: var(--ink); --dot-ring: var(--ink)">
+      <div class="lg__lockup"><svg class="lg__mark" role="img" aria-label="Symbole Oracup"><use href="#oc-mark"/></svg><span class="lg__word">Oracup</span></div>
+    </div>
+    <div class="lg__tile" data-theme="dark" style="background: var(--surface); color: var(--ink)">
+      <div class="lg__lockup"><svg class="lg__mark" role="img" aria-label="Symbole Oracup"><use href="#oc-mark"/></svg><span class="lg__word">Oracup</span></div>
+    </div>
+    <div class="lg__tile" style="background: var(--brand); color: var(--on-brand); border-color: var(--brand)">
+      <div class="lg__lockup"><svg class="lg__mark" role="img" aria-label="Symbole Oracup"><use href="#oc-mark"/></svg><span class="lg__word">Oracup</span></div>
+    </div>
+    <div class="lg__tile" style="background: var(--surface-raised)">
+      <div class="lg__icons">
+        <span class="lg__icon" style="width: 96px; height: 96px"><svg width="64" height="64" aria-hidden="true"><use href="#oc-mark"/></svg></span>
+        <span class="lg__icon" style="width: 48px; height: 48px"><svg width="32" height="32" aria-hidden="true"><use href="#oc-mark"/></svg></span>
+        <span class="lg__icon" style="width: 24px; height: 24px"><svg width="16" height="16" aria-hidden="true"><use href="#oc-mark"/></svg></span>
+      </div>
+    </div>
+  </div>
+  <p class="lg__note">Zone de protection : un diamètre du point jaune autour du logo. Taille minimale : symbole 24 px, symbole avec nom 96 px de large. Le nom est composé en Archivo largeur 125, poids 800.</p>
+</div>

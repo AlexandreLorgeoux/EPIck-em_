@@ -1,6 +1,6 @@
 # Oracup : charte graphique
 
-> Nom de travail à valider par le groupe. Document à placer dans `docs/CHARTE.md`. Les sections jusqu'à « Règles d'or du sujet » forment la mini charte demandée (environ deux pages) ; les annexes donnent les valeurs exactes pour les développeurs.
+> Oracup est le nom du produit (ticket #47). Les sections jusqu'à « Règles d'or du sujet » forment la mini charte demandée (environ deux pages) ; les annexes donnent les valeurs exactes pour les développeurs. Les sources du design system (jetons, composants, logos, icônes, aperçus) sont dans [`docs/design-system/`](design-system/README.md).
 
 Oracup organise des tournois, importe ceux de la communauté et fait pronostiquer le public en direct. L'identité est sobre, lisible de loin et accessible d'abord : une coupe dessinée comme un arbre de tournoi, un vert profond, et un jaune « signal » réservé au direct et à la pastille du pronostic.
 
@@ -169,7 +169,7 @@ Ratios calculés avec la formule WCAG 2.x, le pire cas sur `surface`, `surface-r
 
 ## Annexe E : composants
 
-Le détail visuel de chaque composant (aperçus interactifs et feuille de style `bundle.css`) est dans le design system publié. Règles d'usage :
+Le détail visuel de chaque composant (aperçus et feuille de style `bundle.css`) est dans `docs/design-system/components/`. Règles d'usage :
 
 ### Logo
 
@@ -268,3 +268,17 @@ Symbole pour fond sombre (`oracup-mark-dark.svg`) :
   <circle cx="32" cy="23" r="6" fill="#FFC83D"/>
 </svg>
 ```
+
+Les fichiers sont dans `docs/design-system/assets/Logos/`, et l'icône d'application sert de favicon au web (`apps/web/src/app/icon.svg`).
+
+## Annexe G : dans le code
+
+Le web applique la charte ainsi :
+
+- `apps/web/src/styles/oracup-tokens.css` et `oracup-components.css` sont les copies de `tokens.css` et `components/bundle.css`. Le thème sombre y suit en plus le réglage du système (`prefers-color-scheme`), comme le demande la section Couleur ; `data-theme="dark"` le force, pour le dashboard projeté.
+- `apps/web/src/app/globals.css` expose les jetons à Tailwind : `bg-surface`, `bg-surface-raised`, `text-ink`, `text-ink-soft`, `border-line`, `border-border-ui`, `text-brand`, `bg-brand`, `text-loss`, `rounded-sm`, `rounded-md`, `rounded-lg`. N'écris jamais une couleur en dur. Les polices passent par les classes de style de texte (`display`, `title`, `heading`, `body`, `label`…), pas par des utilitaires Tailwind.
+- Les polices Archivo et Atkinson Hyperlegible sont chargées par `next/font` et servies par le site lui-même.
+- Les classes `oc-*` du design system s'utilisent telles quelles : `oc-btn oc-btn--primary` pour l'action principale d'un écran, `oc-btn--secondary` pour les autres, `oc-btn--danger` pour confirmer une suppression, `oc-card`, `oc-table`, `oc-badge`. Les titres prennent `display`, `title` et `heading`.
+- Le logo et les icônes sont des composants React (`components/brand/logo.tsx`, `components/brand/icon.tsx`) qui dessinent les SVG en ligne avec `currentColor`, pour suivre le thème. Une icône est toujours `aria-hidden` à côté d'un mot.
+- Les écrans sont vérifiés avec axe dans les tests ; le contraste des couleurs, que jsdom ne sait pas calculer, est garanti par les paires de l'annexe D.
+

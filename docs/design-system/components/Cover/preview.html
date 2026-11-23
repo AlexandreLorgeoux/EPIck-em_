@@ -1,0 +1,30 @@
+<!-- @dsCard height=320 -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+  .cv { background: var(--surface); width: 960px; height: 320px; overflow: hidden; }
+  .cv svg { display: block; }
+  .cv .brand { fill: var(--brand); }
+  .cv .ink { fill: var(--ink); }
+  .cv .signal { fill: var(--signal); }
+  .cv .tile { rx: var(--radius-lg); }
+  .cv .bracket { fill: none; stroke: var(--surface); stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
+  .cv .name { font-family: var(--font-display); font-stretch: 125%; font-weight: 800; font-size: 88px; letter-spacing: -0.01em; fill: var(--ink); }
+  .cv .tag { font-family: var(--font-body); font-size: 14px; fill: var(--ink-soft); }
+</style>
+<div class="cv">
+  <svg width="960" height="320" viewBox="0 0 960 320" role="img" aria-label="Oracup : tournois, arbres et pronostics en direct">
+    <!--
+      blocks: brand 272x320 (17 x space-4), ink 208x160, signal 208x144, corners radius-lg.
+      arrangement: one tall slab beside two stacked blocks that bleed off the right edge, a space-4 gap between them.
+      pattern: literal motif, a four-entrant bracket cut out in surface on the brand slab and ending in a signal dot: the product is a bracket that turns into a pick.
+      steps: space-4 gaps, radius-lg corners, stroke 6 with round caps and joins.
+    -->
+    <rect class="brand tile" x="480" y="0" width="272" height="320"/>
+    <rect class="ink tile" x="768" y="0" width="208" height="160"/>
+    <rect class="signal tile" x="768" y="176" width="208" height="144"/>
+    <path class="bracket" d="M504 64H568V128H504M568 96H632V224H568M504 192H568V256H504M632 160H692"/>
+    <circle class="signal" cx="712" cy="160" r="16"/>
+    <text class="name" x="32" y="236">Oracup</text>
+    <text class="tag" x="32" y="276">Tournois, arbres et pronostics en direct.</text>
+  </svg>
+</div>

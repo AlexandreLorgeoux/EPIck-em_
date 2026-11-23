@@ -1,0 +1,47 @@
+<!-- @dsCard group="Contrôles" height=560 subtitle="Boutons, focus et champs de saisie" -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+  .ct { padding: 24px; background: var(--surface); color: var(--ink); font-family: var(--font-body); display: grid; gap: 24px; }
+  .ct h3 { margin: 0 0 12px; font: 700 14px/20px var(--font-body); color: var(--ink-soft); }
+  .ct__row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  .ct__focus { outline: var(--stroke-focus) solid var(--focus); outline-offset: 2px; }
+  .ct__fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; }
+</style>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+</svg>
+<div class="ct">
+  <section>
+    <h3>Boutons (44 px sur le web)</h3>
+    <div class="ct__row">
+      <button class="oc-btn oc-btn--primary" type="button"><svg class="oc-icon" aria-hidden="true"><use href="#i-check"/></svg>Valider mon pronostic</button>
+      <button class="oc-btn oc-btn--secondary" type="button">Voir l'arbre</button>
+      <button class="oc-btn oc-btn--danger" type="button">Annuler l'inscription</button>
+      <button class="oc-btn" type="button" aria-disabled="true"><svg class="oc-icon" aria-hidden="true"><use href="#i-lock"/></svg>Pronostic verrouillé</button>
+    </div>
+  </section>
+  <section>
+    <h3>Bouton large (48 dp sur mobile) et anneau de focus</h3>
+    <div class="ct__row">
+      <button class="oc-btn oc-btn--primary oc-btn--lg" type="button">Rejoindre le groupe</button>
+      <button class="oc-btn oc-btn--secondary oc-btn--lg ct__focus" type="button">Bouton au focus clavier</button>
+    </div>
+  </section>
+  <section>
+    <h3>Champs de saisie</h3>
+    <div class="ct__fields">
+      <div class="oc-field">
+        <label class="oc-field__label" for="ct-team">Nom de l'équipe</label>
+        <input id="ct-team" class="oc-field__input" value="Les Marmottes" aria-describedby="ct-team-hint">
+        <p id="ct-team-hint" class="oc-field__hint" style="margin: 0">Visible sur l'arbre et le classement.</p>
+      </div>
+      <div class="oc-field">
+        <label class="oc-field__label" for="ct-score">Score de Marmottes</label>
+        <input id="ct-score" class="oc-field__input" value="120" inputmode="numeric" aria-invalid="true" aria-describedby="ct-score-err">
+        <p id="ct-score-err" class="oc-field__error" style="margin: 0"><svg class="oc-icon" aria-hidden="true"><use href="#i-close"/></svg><span>Erreur : le score doit être un nombre entre 0 et 99. Corrige la valeur puis valide.</span></p>
+      </div>
+    </div>
+  </section>
+</div>
