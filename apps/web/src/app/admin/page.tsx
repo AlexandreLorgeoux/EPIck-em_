@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { routes } from "@/lib/routes";
 
-export const metadata: Metadata = { title: "Administration · EPIck'em" };
+export const metadata: Metadata = { title: "Administration" };
 
 const sections = [
   {
@@ -26,11 +26,11 @@ const sections = [
 export default function AdminHomePage() {
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-6 px-4 py-12">
-      <h1 className="text-3xl font-bold">Administration</h1>
+      <h1 className="display">Administration</h1>
       <ul className="grid gap-4 sm:grid-cols-3">
         {sections.map((section) => (
-          <li key={section.href} className="rounded-md border-2 p-4">
-            <h2 className="text-xl font-bold">
+          <li key={section.href} className="oc-card">
+            <h2 className="heading">
               <Link
                 href={section.href}
                 className="underline underline-offset-4"

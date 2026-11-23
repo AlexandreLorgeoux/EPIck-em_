@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { refreshPublicTournament } from "@/app/tournaments/actions";
+import { refreshPublicTournament } from "@/lib/api/refresh-public";
 import { ResultsBoard } from "./results-board";
 
 export const metadata: Metadata = { title: "Résultats · Administration" };

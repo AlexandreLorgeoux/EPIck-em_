@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormField, controlClass } from "@/components/form-field";
-import { buttonClass } from "@/components/styles";
+import { primaryButtonClass } from "@/components/styles";
 import { api } from "@/lib/api/client";
 import type { Tournament } from "@/lib/api/models";
 import { useApiForm } from "@/lib/forms/use-api-form";
 import { routes } from "@/lib/routes";
+import { ErrorMessage } from "@/components/messages";
 
 const labels = {
   name: "Nom",
@@ -45,7 +46,7 @@ export function TournamentForm() {
       >
         Retour aux tournois
       </Link>
-      <h1 className="text-3xl font-bold">Créer un tournoi</h1>
+      <h1 className="display">Créer un tournoi</h1>
       <p>
         Le tournoi est créé en brouillon : il reste invisible au public
         jusqu&apos;à la génération de l&apos;arbre.
@@ -110,9 +111,13 @@ export function TournamentForm() {
           )}
         </FormField>
 
-        {form.formError && <p role="alert">{form.formError}</p>}
+        {form.formError && <ErrorMessage>{form.formError}</ErrorMessage>}
 
-        <button type="submit" disabled={form.pending} className={buttonClass}>
+        <button
+          type="submit"
+          disabled={form.pending}
+          className={primaryButtonClass}
+        >
           {form.pending ? "Création…" : "Créer le tournoi"}
         </button>
       </form>

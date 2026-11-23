@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
+import { ErrorMessage, FieldError } from "@/components/messages";
+import { primaryButtonClass } from "@/components/styles";
 import { isApiError } from "@/lib/api/errors";
 import { SESSION_EXPIRED_MESSAGE, useAuth } from "@/lib/auth/auth-provider";
 
@@ -55,15 +57,15 @@ export function LoginForm() {
   }
 
   return (
-    <main className="mx-auto flex max-w-sm flex-col gap-6 px-4 py-16">
-      <h1 ref={headingRef} tabIndex={-1} className="text-3xl font-bold">
+    <div className="mx-auto flex max-w-md flex-col gap-6 px-4 py-12">
+      <h1 ref={headingRef} tabIndex={-1} className="display">
         Connexion
       </h1>
-      {sessionExpired && <p>{SESSION_EXPIRED_MESSAGE}</p>}
+      {sessionExpired && <p className="body-lg">{SESSION_EXPIRED_MESSAGE}</p>}
 
-      <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
-        <div className="flex flex-col gap-1">
-          <label htmlFor={ids.email} className="font-bold">
+      <form onSubmit={onSubmit} noValidate className="oc-card gap-4">
+        <div className="oc-field">
+          <label htmlFor={ids.email} className="oc-field__label">
             Adresse e-mail
           </label>
           <input
@@ -76,15 +78,17 @@ export function LoginForm() {
             aria-describedby={
               fieldErrors.email ? `${ids.email}-error` : undefined
             }
-            className="min-h-11 rounded-md border-2 px-3"
+            className="oc-field__input"
           />
           {fieldErrors.email && (
-            <p id={`${ids.email}-error`}>{fieldErrors.email}</p>
+            <FieldError id={`${ids.email}-error`}>
+              {fieldErrors.email}
+            </FieldError>
           )}
         </div>
 
-        <div className="flex flex-col gap-1">
-          <label htmlFor={ids.password} className="font-bold">
+        <div className="oc-field">
+          <label htmlFor={ids.password} className="oc-field__label">
             Mot de passe
           </label>
           <input
@@ -97,27 +101,21 @@ export function LoginForm() {
             aria-describedby={
               fieldErrors.password ? `${ids.password}-error` : undefined
             }
-            className="min-h-11 rounded-md border-2 px-3"
+            className="oc-field__input"
           />
           {fieldErrors.password && (
-            <p id={`${ids.password}-error`}>{fieldErrors.password}</p>
+            <FieldError id={`${ids.password}-error`}>
+              {fieldErrors.password}
+            </FieldError>
           )}
         </div>
 
-        {error && (
-          <p id={ids.error} role="alert">
-            {error}
-          </p>
-        )}
+        {error && <ErrorMessage>{error}</ErrorMessage>}
 
-        <button
-          type="submit"
-          disabled={pending}
-          className="min-h-11 rounded-md border-2 px-4 font-bold"
-        >
+        <button type="submit" disabled={pending} className={primaryButtonClass}>
           {pending ? "Connexion…" : "Se connecter"}
         </button>
       </form>
-    </main>
+    </div>
   );
 }

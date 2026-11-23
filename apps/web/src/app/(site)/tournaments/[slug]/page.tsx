@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { Icon } from "@/components/brand/icon";
 import { BracketSwitcher } from "@/components/bracket/bracket-switcher";
 import { championOf } from "@/components/bracket/bracket-text";
 import { StatusBadge, formatDate } from "@/components/tournament-status";
@@ -18,7 +19,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const data = await getPublicTournament((await params).slug);
   return {
-    title: data ? `${data.tournament.name} · EPIck'em` : "Tournoi · EPIck'em",
+    title: data ? data.tournament.name : "Tournoi",
   };
 }
 
@@ -33,7 +34,7 @@ async function Tournament({ params }: { params: Params }) {
   return (
     <>
       <header className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold">{tournament.name}</h1>
+        <h1 className="display-xl break-words">{tournament.name}</h1>
         <p className="flex flex-wrap items-center gap-3">
           <span>Statut :</span> <StatusBadge status={tournament.status} />
         </p>
@@ -46,8 +47,8 @@ async function Tournament({ params }: { params: Params }) {
       </header>
 
       {winner && (
-        <p className="rounded-md border-4 border-double p-4 text-xl font-bold">
-          <span aria-hidden="true">🏆 </span>
+        <p className="oc-card heading flex items-center gap-2 border-2 border-brand text-brand">
+          <Icon name="check" />
           {winner} remporte le tournoi.
         </p>
       )}
@@ -56,7 +57,7 @@ async function Tournament({ params }: { params: Params }) {
         aria-labelledby="results-heading"
         className="flex flex-col gap-4"
       >
-        <h2 id="results-heading" className="text-2xl font-bold">
+        <h2 id="results-heading" className="title">
           Matchs et résultats
         </h2>
         {bracket ? (
@@ -75,13 +76,13 @@ export default function TournamentPage({
   params,
 }: PageProps<"/tournaments/[slug]">) {
   return (
-    <main className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-12">
+    <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-12">
       <Link href={routes.tournaments} className="underline underline-offset-4">
         Tous les tournois
       </Link>
       <Suspense fallback={<p>Chargement du tournoi…</p>}>
         <Tournament params={params} />
       </Suspense>
-    </main>
+    </div>
   );
 }

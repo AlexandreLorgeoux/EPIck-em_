@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useId, useRef } from "react";
-import { buttonClass } from "@/components/styles";
+import { buttonClass, primaryButtonClass } from "@/components/styles";
 import { controlClass } from "@/components/form-field";
+import { FieldError } from "@/components/messages";
 import { api } from "@/lib/api/client";
 import type { Bracket, BracketMatch } from "@/lib/api/models";
 import { useApiForm } from "@/lib/forms/use-api-form";
+import { ErrorMessage } from "@/components/messages";
 
 const labels = {
   scores: "Score",
@@ -68,16 +70,8 @@ export function ResultForm({
     errors[field] ? true : undefined;
 
   return (
-    <section
-      aria-labelledby={ids.heading}
-      className="flex flex-col gap-4 rounded-md border-2 p-4"
-    >
-      <h2
-        id={ids.heading}
-        ref={headingRef}
-        tabIndex={-1}
-        className="text-2xl font-bold"
-      >
+    <section aria-labelledby={ids.heading} className="oc-card">
+      <h2 id={ids.heading} ref={headingRef} tabIndex={-1} className="title">
         {correcting ? "Corriger" : "Résultat de"} {match.label} : {teams[0]}{" "}
         contre {teams[1]}
       </h2>
@@ -89,7 +83,7 @@ export function ResultForm({
         className="flex flex-col gap-4"
       >
         <fieldset className="flex flex-col gap-2">
-          <legend className="font-bold">Score</legend>
+          <legend className="oc-field__label">Score</legend>
           <div className="flex flex-wrap gap-4">
             {match.slots.map((slot, i) => (
               <div key={slot.position} className="flex flex-col gap-1">
@@ -113,10 +107,7 @@ export function ResultForm({
             ))}
           </div>
           {errors.scores && (
-            <p id={`${ids.scores}-error`} className="font-bold">
-              <span aria-hidden="true">⚠ </span>
-              {errors.scores}
-            </p>
+            <FieldError id={`${ids.scores}-error`}>{errors.scores}</FieldError>
           )}
         </fieldset>
 
@@ -127,7 +118,7 @@ export function ResultForm({
           aria-describedby={describedBy("winnerSlot", ids.winner)}
           className="flex flex-col gap-1"
         >
-          <p id={`${ids.winner}-label`} className="font-bold">
+          <p id={`${ids.winner}-label`} className="oc-field__label">
             Vainqueur
           </p>
           {match.slots.map((slot, i) => (
@@ -146,19 +137,18 @@ export function ResultForm({
             </label>
           ))}
           {errors.winnerSlot && (
-            <p id={`${ids.winner}-error`} className="font-bold">
-              <span aria-hidden="true">⚠ </span>
+            <FieldError id={`${ids.winner}-error`}>
               {errors.winnerSlot}
-            </p>
+            </FieldError>
           )}
         </div>
 
         {correcting && (
           <div className="flex flex-col gap-1">
-            <label htmlFor={ids.reason} className="font-bold">
+            <label htmlFor={ids.reason} className="oc-field__label">
               {labels.reason}
             </label>
-            <p id={`${ids.reason}-hint`}>
+            <p id={`${ids.reason}-hint`} className="oc-field__hint">
               Gardée dans l&apos;historique du match, par exemple « scores
               inversés ».
             </p>
@@ -177,18 +167,21 @@ export function ResultForm({
               className={`${controlClass} py-2`}
             />
             {errors.reason && (
-              <p id={`${ids.reason}-error`} className="font-bold">
-                <span aria-hidden="true">⚠ </span>
+              <FieldError id={`${ids.reason}-error`}>
                 {errors.reason}
-              </p>
+              </FieldError>
             )}
           </div>
         )}
 
-        {form.formError && <p role="alert">{form.formError}</p>}
+        {form.formError && <ErrorMessage>{form.formError}</ErrorMessage>}
 
         <div className="flex flex-wrap gap-3">
-          <button type="submit" className={buttonClass} disabled={form.pending}>
+          <button
+            type="submit"
+            className={primaryButtonClass}
+            disabled={form.pending}
+          >
             {form.pending
               ? "Enregistrement…"
               : correcting

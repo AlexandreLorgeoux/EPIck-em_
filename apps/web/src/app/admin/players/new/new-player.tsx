@@ -17,7 +17,7 @@ export function NewPlayer() {
       >
         Retour aux joueurs
       </Link>
-      <h1 className="text-3xl font-bold">Créer un joueur</h1>
+      <h1 className="display">Créer un joueur</h1>
       <PlayerForm
         submitLabel="Créer le joueur"
         onSubmit={async (values) => {

@@ -10,6 +10,7 @@ import type { Player } from "@/lib/api/models";
 import { explainMessage } from "@/lib/forms/explain";
 import { routes } from "@/lib/routes";
 import { PlayerForm } from "../player-form";
+import { ErrorMessage } from "@/components/messages";
 
 const messageOf = (caught: unknown) =>
   isApiError(caught)
@@ -43,7 +44,7 @@ export function PlayerEditor({ id }: { id: string }) {
   if (loadError) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-12">
-        <p role="alert">{loadError}</p>
+        <ErrorMessage>{loadError}</ErrorMessage>
       </div>
     );
   }
@@ -59,11 +60,11 @@ export function PlayerEditor({ id }: { id: string }) {
       >
         Retour aux joueurs
       </Link>
-      <h1 className="text-3xl font-bold">{player.handle}</h1>
+      <h1 className="display">{player.handle}</h1>
       <p role="status" className="sr-only">
         {notice}
       </p>
-      {error && <p role="alert">{error}</p>}
+      {error && <ErrorMessage>{error}</ErrorMessage>}
 
       <p>
         {player.team ? (
@@ -84,7 +85,7 @@ export function PlayerEditor({ id }: { id: string }) {
       </p>
 
       <section aria-labelledby="handle-heading" className="flex flex-col gap-4">
-        <h2 id="handle-heading" className="text-2xl font-bold">
+        <h2 id="handle-heading" className="title">
           Changer le pseudo
         </h2>
         <PlayerForm
@@ -103,7 +104,7 @@ export function PlayerEditor({ id }: { id: string }) {
       </section>
 
       <section aria-labelledby="delete-heading" className="flex flex-col gap-4">
-        <h2 id="delete-heading" className="text-2xl font-bold">
+        <h2 id="delete-heading" className="title">
           Supprimer le joueur
         </h2>
         <ConfirmAction

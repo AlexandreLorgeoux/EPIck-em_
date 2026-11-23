@@ -25,18 +25,24 @@ export function BracketView({
       <ol className="flex min-w-max gap-6">
         {bracket.rounds.map(({ round, matches }) => (
           <li key={round} className="flex w-72 flex-col gap-4">
-            <h2 className="text-xl font-bold">{roundName(round, rounds)}</h2>
+            <h2 className="title">{roundName(round, rounds)}</h2>
             <ul className="flex grow flex-col justify-around gap-4">
               {matches.map((match) => {
-                const decided = match.state === "decided";
+                // Badges for played matches only: a bye is decided without a winner
+                // in the sporting sense
+                const decided = match.state === "decided" && match.hasResult;
                 return (
                   <li
                     key={match.id}
-                    className={`flex flex-col gap-2 rounded-md border-2 p-3 ${
-                      needsAttention(match) ? "border-dashed" : ""
+                    // A match to correct gets a dashed loss border; its
+                    // status says why in words
+                    className={`oc-card ${
+                      needsAttention(match)
+                        ? "border-2 border-dashed border-loss"
+                        : ""
                     }`}
                   >
-                    <h3 className="font-bold">{match.label}</h3>
+                    <h3 className="heading">{match.label}</h3>
                     <ul className="flex flex-col gap-1">
                       {match.slots.map((slot) => (
                         <li
@@ -45,14 +51,14 @@ export function BracketView({
                         >
                           <TeamLabel slot={slot} decided={decided} />
                           {match.hasResult && (
-                            <span className="tabular-nums font-bold">
+                            <span className="tabular text-xl font-bold">
                               {slot.score ?? 0}
                             </span>
                           )}
                         </li>
                       ))}
                     </ul>
-                    <p className="text-sm">
+                    <p className="body-sm text-ink-soft">
                       {matchStatus(match)}
                       {match.hasResult && (
                         <span className="sr-only">

@@ -12,6 +12,7 @@ import type { Player, Team } from "@/lib/api/models";
 import { explainMessage } from "@/lib/forms/explain";
 import { routes } from "@/lib/routes";
 import { TeamForm } from "../team-form";
+import { ErrorMessage } from "@/components/messages";
 
 const messageOf = (caught: unknown) =>
   isApiError(caught)
@@ -113,7 +114,7 @@ export function TeamEditor({ id }: { id: string }) {
   if (loadError) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-12">
-        <p role="alert">{loadError}</p>
+        <ErrorMessage>{loadError}</ErrorMessage>
       </div>
     );
   }
@@ -131,7 +132,7 @@ export function TeamEditor({ id }: { id: string }) {
       <Link href={routes.admin.teams} className="underline underline-offset-4">
         Retour aux équipes
       </Link>
-      <h1 className="text-3xl font-bold">
+      <h1 className="display">
         {team.name}
         {team.tag && <span className="font-normal"> [{team.tag}]</span>}
       </h1>
@@ -139,13 +140,13 @@ export function TeamEditor({ id }: { id: string }) {
       <p role="status" className="sr-only">
         {notice}
       </p>
-      {error && <p role="alert">{error}</p>}
+      {error && <ErrorMessage>{error}</ErrorMessage>}
 
       <section
         aria-labelledby="identity-heading"
         className="flex flex-col gap-4"
       >
-        <h2 id="identity-heading" className="text-2xl font-bold">
+        <h2 id="identity-heading" className="title">
           Nom et tag
         </h2>
         <TeamForm
@@ -170,7 +171,7 @@ export function TeamEditor({ id }: { id: string }) {
         aria-labelledby="members-heading"
         className="flex flex-col gap-4"
       >
-        <h2 id="members-heading" className="text-2xl font-bold">
+        <h2 id="members-heading" className="title">
           Joueurs ({team.members.length})
         </h2>
         {team.members.length === 0 ? (
@@ -180,7 +181,7 @@ export function TeamEditor({ id }: { id: string }) {
             {team.members.map((member) => (
               <li
                 key={member.id}
-                className="flex flex-wrap items-center gap-3 rounded-md border-2 px-3 py-2"
+                className="oc-card flex flex-wrap items-center gap-3"
               >
                 <span className="grow">
                   <span className="font-bold">{member.handle}</span>
@@ -206,11 +207,8 @@ export function TeamEditor({ id }: { id: string }) {
           </ul>
         )}
 
-        <form
-          onSubmit={addMember}
-          className="flex flex-col gap-3 rounded-md border-2 p-4"
-        >
-          <h3 className="text-xl font-bold">Ajouter un joueur</h3>
+        <form onSubmit={addMember} className="oc-card">
+          <h3 className="heading">Ajouter un joueur</h3>
           {free.length === 0 ? (
             <p>
               Tous les joueurs ont déjà une équipe.{" "}
@@ -224,7 +222,7 @@ export function TeamEditor({ id }: { id: string }) {
           ) : (
             <>
               <div className="flex flex-col gap-1">
-                <label htmlFor={ids.player} className="font-bold">
+                <label htmlFor={ids.player} className="oc-field__label">
                   Joueur
                 </label>
                 <p id={`${ids.player}-hint`}>
@@ -244,7 +242,7 @@ export function TeamEditor({ id }: { id: string }) {
                 </select>
               </div>
               <div className="flex flex-col gap-1">
-                <label htmlFor={ids.role} className="font-bold">
+                <label htmlFor={ids.role} className="oc-field__label">
                   Rôle <span className="font-normal">(facultatif)</span>
                 </label>
                 <input
@@ -282,7 +280,7 @@ export function TeamEditor({ id }: { id: string }) {
             className="flex flex-wrap items-end gap-3"
           >
             <div className="flex flex-col gap-1">
-              <label htmlFor={ids.captain} className="font-bold">
+              <label htmlFor={ids.captain} className="oc-field__label">
                 Capitaine
               </label>
               <select
@@ -308,7 +306,7 @@ export function TeamEditor({ id }: { id: string }) {
       </section>
 
       <section aria-labelledby="delete-heading" className="flex flex-col gap-4">
-        <h2 id="delete-heading" className="text-2xl font-bold">
+        <h2 id="delete-heading" className="title">
           Supprimer l&apos;équipe
         </h2>
         <ConfirmAction

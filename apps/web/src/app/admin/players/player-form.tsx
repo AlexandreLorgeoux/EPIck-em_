@@ -1,9 +1,10 @@
 "use client";
 
 import { FormField, controlClass } from "@/components/form-field";
-import { buttonClass } from "@/components/styles";
+import { primaryButtonClass } from "@/components/styles";
 import type { Player } from "@/lib/api/models";
 import { useApiForm, type FormValues } from "@/lib/forms/use-api-form";
+import { ErrorMessage } from "@/components/messages";
 
 const labels = { handle: "Pseudo" };
 
@@ -41,8 +42,12 @@ export function PlayerForm({
           />
         )}
       </FormField>
-      {form.formError && <p role="alert">{form.formError}</p>}
-      <button type="submit" disabled={form.pending} className={buttonClass}>
+      {form.formError && <ErrorMessage>{form.formError}</ErrorMessage>}
+      <button
+        type="submit"
+        disabled={form.pending}
+        className={primaryButtonClass}
+      >
         {form.pending ? "Enregistrement…" : submitLabel}
       </button>
     </form>

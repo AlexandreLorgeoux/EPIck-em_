@@ -14,7 +14,7 @@ export function NewTeam() {
       <Link href={routes.admin.teams} className="underline underline-offset-4">
         Retour aux équipes
       </Link>
-      <h1 className="text-3xl font-bold">Créer une équipe</h1>
+      <h1 className="display">Créer une équipe</h1>
       <TeamForm
         submitLabel="Créer l'équipe"
         onSubmit={async (values) => {

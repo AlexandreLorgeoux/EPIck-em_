@@ -62,7 +62,7 @@ describe("TournamentForm", () => {
     expect(name.getAttribute("aria-describedby")).toContain("-error");
     // In French, with how to fix it
     expect(screen.getByText(/«Nom» doit faire/).textContent).toBe(
-      "⚠ «Nom» doit faire entre 3 et 80 caractères. Tu en as saisi 2 : ajoute au moins 1 caractère.",
+      "«Nom» doit faire entre 3 et 80 caractères. Tu en as saisi 2 : ajoute au moins 1 caractère.",
     );
     expect(
       screen.getByText(/«Fin prévue» doit être après «Début»/),

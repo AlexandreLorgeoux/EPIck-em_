@@ -7,14 +7,14 @@ import type { Tournament } from "@/lib/api/models";
 import { getPublicTournaments } from "@/lib/api/public";
 import { routes } from "@/lib/routes";
 
-export const metadata: Metadata = { title: "Tournois · EPIck'em" };
+export const metadata: Metadata = { title: "Tournois" };
 
 function TournamentCards({ list }: { list: Tournament[] }) {
   return (
     <ul className="grid gap-4 sm:grid-cols-2">
       {list.map((t) => (
-        <li key={t.id} className="flex flex-col gap-2 rounded-md border-2 p-4">
-          <h3 className="text-xl font-bold">
+        <li key={t.id} className="oc-card">
+          <h3 className="heading">
             <Link
               href={routes.tournament(t.slug)}
               className="underline underline-offset-4"
@@ -50,7 +50,7 @@ async function Tournaments() {
         aria-labelledby="running-heading"
         className="flex flex-col gap-4"
       >
-        <h2 id="running-heading" className="text-2xl font-bold">
+        <h2 id="running-heading" className="title">
           En cours
         </h2>
         {running.length ? (
@@ -64,7 +64,7 @@ async function Tournaments() {
           aria-labelledby="finished-heading"
           className="flex flex-col gap-4"
         >
-          <h2 id="finished-heading" className="text-2xl font-bold">
+          <h2 id="finished-heading" className="title">
             Terminés
           </h2>
           <TournamentCards list={finished} />
@@ -77,11 +77,11 @@ async function Tournaments() {
 // Public: anyone follows the tournaments, without signing in
 export default function TournamentsPage() {
   return (
-    <main className="mx-auto flex max-w-5xl flex-col gap-8 px-4 py-12">
-      <h1 className="text-3xl font-bold">Tournois</h1>
+    <div className="mx-auto flex max-w-5xl flex-col gap-8 px-4 py-12">
+      <h1 className="display">Tournois</h1>
       <Suspense fallback={<p>Chargement des tournois…</p>}>
         <Tournaments />
       </Suspense>
-    </main>
+    </div>
   );
 }
