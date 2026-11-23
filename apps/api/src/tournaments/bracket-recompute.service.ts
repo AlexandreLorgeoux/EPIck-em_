@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { computeBracket } from '../engine/bracket.js';
+import { computeBracket, type ReportedResult } from '../engine/bracket.js';
 import { resultWinner, type RoundScores } from '../engine/result.js';
 import {
   matchKey,
@@ -50,6 +50,7 @@ export class BracketRecomputeService {
             id: true,
             outcomeKind: true,
             declaredWinnerSlot: true,
+            entrants: { select: { slotPosition: true, registrationId: true } },
             rounds: {
               orderBy: { number: 'asc' },
               select: {
@@ -80,7 +81,7 @@ export class BracketRecomputeService {
     const seeds = new Map(registrations.map((r) => [r.seed!, r.id]));
 
     // A void result sends the match back to pending: it is left out
-    const results = new Map<string, 1 | 2 | 'conflict'>();
+    const results = new Map<string, ReportedResult>();
     const resultId = new Map<string, bigint>();
     for (const m of matches) {
       const current = m.results[0];
@@ -91,7 +92,13 @@ export class BracketRecomputeService {
       ]);
       const winner = resultWinner(rounds, current.declaredWinnerSlot);
       if (winner === null) continue;
-      results.set(keyOf.get(m.id)!, winner);
+      const entrant = (slot: number) =>
+        current.entrants.find((e) => e.slotPosition === slot)?.registrationId ??
+        null;
+      results.set(keyOf.get(m.id)!, {
+        winner,
+        entrants: [entrant(1), entrant(2)],
+      });
       resultId.set(keyOf.get(m.id)!, current.id);
     }
 
