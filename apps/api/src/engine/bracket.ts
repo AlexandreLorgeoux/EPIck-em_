@@ -13,8 +13,9 @@ export interface SlotView {
 }
 
 export interface OutcomeView {
-  // conflict: the result contradicts itself, nobody goes through
-  state: 'pending' | 'decided' | 'conflict';
+  // conflict: the result contradicts itself; stale: it names teams that no
+  // longer play this match. In both cases nobody goes through.
+  state: 'pending' | 'decided' | 'conflict' | 'stale';
   winner: string | null;
   loser: string | null;
 }
@@ -25,14 +26,24 @@ export interface BracketState {
   outcomes: Map<string, OutcomeView>;
 }
 
+// The current result of a match, as layer 1 reads it
+export interface ReportedResult {
+  // Winning slot (see resultWinner), or a conflict
+  winner: 1 | 2 | 'conflict';
+  // Who the result says played in slots 1 and 2. A result naming other
+  // teams than the slots now hold is stale (data model, section 6.4).
+  // Left out, the teams are not checked.
+  entrants?: readonly [string | null, string | null];
+}
+
 export const slotKey = (match: string, slot: 1 | 2) => `${match}:${slot}`;
 
 export function computeBracket(
   plan: PlannedMatch[],
   // Participant of each seed
   seeds: ReadonlyMap<number, string>,
-  // What the current result of each played match says (see resultWinner)
-  results: ReadonlyMap<string, 1 | 2 | 'conflict'> = new Map(),
+  // The current result of each played match
+  results: ReadonlyMap<string, ReportedResult> = new Map(),
 ): BracketState {
   const slots = new Map<string, SlotView>();
   const outcomes = new Map<string, OutcomeView>();
@@ -68,7 +79,7 @@ export function computeBracket(
 
 function decide(
   [first, second]: [SlotView, SlotView],
-  result: 1 | 2 | 'conflict' | undefined,
+  result: ReportedResult | undefined,
 ): OutcomeView {
   // A bye: the participant facing nobody goes through without playing
   if (first.state === 'bye' || second.state === 'bye') {
@@ -81,10 +92,18 @@ function decide(
   if (!result || first.state !== 'assigned' || second.state !== 'assigned') {
     return { state: 'pending', winner: null, loser: null };
   }
-  if (result === 'conflict') {
+  const { entrants } = result;
+  if (
+    entrants &&
+    (entrants[0] !== first.participant || entrants[1] !== second.participant)
+  ) {
+    return { state: 'stale', winner: null, loser: null };
+  }
+  if (result.winner === 'conflict') {
     return { state: 'conflict', winner: null, loser: null };
   }
-  const [winner, loser] = result === 1 ? [first, second] : [second, first];
+  const [winner, loser] =
+    result.winner === 1 ? [first, second] : [second, first];
   return {
     state: 'decided',
     winner: winner.participant,

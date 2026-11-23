@@ -1,6 +1,10 @@
 import { describe, expect, it } from '@jest/globals';
-import { computeBracket, slotKey } from './bracket.js';
+import { computeBracket, slotKey, type ReportedResult } from './bracket.js';
 import { planSingleElimination } from './single-elimination.js';
+
+// Results keyed by match, winning slot only: teams not checked
+const won = (entries: [string, ReportedResult['winner']][]) =>
+  new Map(entries.map(([match, winner]) => [match, { winner }]));
 
 // Seed n is played by team "Tn"
 const seeds = (n: number) =>
@@ -67,10 +71,10 @@ describe('computeBracket', () => {
     const { slots, outcomes } = computeBracket(
       plan,
       seeds(4),
-      new Map([
-        ['r1m1', 2 as const], // T4 beats T1
-        ['r1m2', 1 as const], // T2 beats T3
-        ['r2m1', 1 as const], // T4 beats T2 in the final
+      won([
+        ['r1m1', 2], // T4 beats T1
+        ['r1m2', 1], // T2 beats T3
+        ['r2m1', 1], // T4 beats T2 in the final
       ]),
     );
     expect(outcomes.get('r1m1')).toEqual({
@@ -91,7 +95,7 @@ describe('computeBracket', () => {
     const { outcomes } = computeBracket(
       planSingleElimination(4),
       seeds(4),
-      new Map([['r2m1', 1 as const]]),
+      won([['r2m1', 1]]),
     );
     expect(outcomes.get('r2m1')?.state).toBe('pending');
   });
@@ -100,7 +104,7 @@ describe('computeBracket', () => {
     const { slots, outcomes } = computeBracket(
       planSingleElimination(4),
       seeds(4),
-      new Map([['r1m1', 'conflict' as const]]),
+      won([['r1m1', 'conflict']]),
     );
     expect(outcomes.get('r1m1')).toEqual({
       state: 'conflict',
@@ -110,9 +114,44 @@ describe('computeBracket', () => {
     expect(slots.get(slotKey('r2m1', 1))?.state).toBe('open');
   });
 
+  it('marks a result stale when its teams no longer play the match', () => {
+    // The final was reported as T1 against T2, then the first semi-final
+    // was corrected: T4 now sits in slot 1
+    const { outcomes, slots } = computeBracket(
+      planSingleElimination(4),
+      seeds(4),
+      new Map<string, ReportedResult>([
+        ['r1m1', { winner: 2, entrants: ['T1', 'T4'] }],
+        ['r1m2', { winner: 1, entrants: ['T2', 'T3'] }],
+        ['r2m1', { winner: 1, entrants: ['T1', 'T2'] }],
+      ]),
+    );
+    expect(slots.get(slotKey('r2m1', 1))?.participant).toBe('T4');
+    expect(outcomes.get('r2m1')).toEqual({
+      state: 'stale',
+      winner: null,
+      loser: null,
+    });
+  });
+
+  it('decides a result whose teams match the slots', () => {
+    const { outcomes } = computeBracket(
+      planSingleElimination(2),
+      seeds(2),
+      new Map<string, ReportedResult>([
+        ['r1m1', { winner: 2, entrants: ['T1', 'T2'] }],
+      ]),
+    );
+    expect(outcomes.get('r1m1')).toEqual({
+      state: 'decided',
+      winner: 'T2',
+      loser: 'T1',
+    });
+  });
+
   it('gives the same result for the same input, whatever the plan order', () => {
     const plan = planSingleElimination(6);
-    const winners = new Map([['r1m2', 1 as const]]);
+    const winners = won([['r1m2', 1]]);
     const a = computeBracket(plan, seeds(6), winners);
     const b = computeBracket([...plan].reverse(), seeds(6), winners);
     expect([...b.slots]).toEqual([...a.slots]);
