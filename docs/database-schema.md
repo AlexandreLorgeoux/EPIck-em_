@@ -310,13 +310,29 @@ Endpoints of ticket #49, for any signed-in user whatever their role (anonymous v
 
 A match takes predictions while both its teams are known, it is not a bye, it has no result and its `scheduled_at` has not passed, by the server clock only. Otherwise the answer is `409` with `code: "prediction_locked"` and a `reason`: `started`, `played`, `teams-unknown` or `bye`. An exact score must name a winner, and that winner must be the picked team.
 
+Scoring and resolution, ticket #50:
+
+| Endpoint | Does |
+| --- | --- |
+| `GET /tournaments/:id/scoring` | The points of the tournament, with `isDefault` while no admin set them. Public, with the same visibility as the tournament. |
+| `PUT /tournaments/:id/scoring` `{ pointsCorrectPick, exactScoreBonus, roundIncrement }` | Admin only, whole numbers from 0 to 100. Logs a `scoring_changed` entry with the old and new values, then scores every prediction again with the new points. |
+
+The recalculation that runs after a result resolves the predictions in the same transaction as the bracket advance: the result, the bracket and the points are saved together or not at all. For each prediction (`apps/api/src/engine/predictions.ts`):
+
+- the match is decided and the picked team won: `correct`, worth the points of its round, plus the bonus when the exact score was right too;
+- the match is decided and the picked team lost: `wrong`, 0 points;
+- a correction moved the picked team out of the match: `cancelled`, 0 points;
+- otherwise (no result, stale or in conflict): `pending`.
+
+Only predictions whose status or points change are written, so a run that changes nothing writes nothing.
+
 - `prediction`: a user's pick for a match, one per user and match, with an optional exact score (slot 1, slot 2). The pick is a registration, not a slot, so a correction that changes who plays the match is visible. The user edits it until the match locks; `status`, `points` and `resolved_at` are the outcome, set by the recalculation.
 - `scoring_config`: the points of a tournament. A correct pick in round r is worth `points_correct_pick + (r - 1) * round_increment`, plus `exact_score_bonus` for the exact score. Without a row, the defaults apply: 3, 2 and 1. It is removed with a deleted draft.
 - `score_audit_log`: who did what that moves points, when, with the old and new values as JSON snapshots and the reason of a correction.
 
 ## Demo data
 
-`npm run db:seed -w apps/api` fills the database in `DATABASE_URL` with a demo: the running tournament `/tournaments/coupe-de-demonstration` with 8 teams, 12 synthetic users (`is_synthetic`, no password, addresses in `.test`) who predicted every first-round match, and 2 results already entered. Everything is fictitious, and a second run does nothing. It goes through the API services (`apps/api/src/seed/demo.ts`), so it follows the same rules as the admin screens.
+`npm run db:seed -w apps/api` fills the database in `DATABASE_URL` with a demo: the running tournament `/tournaments/coupe-de-demonstration` with 8 teams, 12 synthetic users (`is_synthetic`, no password, addresses in `.test`) who predicted every first-round match, and 2 results already entered, which resolve the predictions on those 2 matches. Everything is fictitious, and a second run does nothing. It goes through the API services (`apps/api/src/seed/demo.ts`), so it follows the same rules as the admin screens.
 
 ## Not implemented yet
 
