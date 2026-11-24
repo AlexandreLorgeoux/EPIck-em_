@@ -6,6 +6,7 @@ import { MatchResultsController } from './match-results.controller.js';
 import { MatchResultsService } from './match-results.service.js';
 import { ScoringController } from './scoring.controller.js';
 import { ScoringService } from './scoring.service.js';
+import { TournamentEventsService } from './tournament-events.service.js';
 import { TournamentTeamsController } from './tournament-teams.controller.js';
 import { TournamentTeamsService } from './tournament-teams.service.js';
 import { TournamentsController } from './tournaments.controller.js';
@@ -26,6 +27,7 @@ import { TournamentsService } from './tournaments.service.js';
     BracketRecomputeService,
     MatchResultsService,
     ScoringService,
+    TournamentEventsService,
   ],
 })
 export class TournamentsModule {}

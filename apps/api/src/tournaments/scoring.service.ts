@@ -4,6 +4,7 @@ import { DEFAULT_SCORING, type ScoringRule } from '../engine/predictions.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { BracketRecomputeService } from './bracket-recompute.service.js';
 import { SetScoringDto } from './dto/set-scoring.dto.js';
+import { TournamentEventsService } from './tournament-events.service.js';
 import { TournamentsService } from './tournaments.service.js';
 
 const ADMIN_VIEW: AuthUser = { id: '', role: 'admin' };
@@ -20,6 +21,7 @@ export class ScoringService {
     private readonly prisma: PrismaService,
     private readonly tournaments: TournamentsService,
     private readonly recompute: BracketRecomputeService,
+    private readonly events: TournamentEventsService,
   ) {}
 
   // The points of the tournament; the defaults until an admin sets them
@@ -42,7 +44,7 @@ export class ScoringService {
   async set(tournamentId: string, dto: SetScoringDto, user: AuthUser) {
     const tournament = await this.tournaments.findOne(tournamentId, ADMIN_VIEW);
     const rule = ruleOf(dto);
-    await this.prisma.$transaction(async (tx) => {
+    const version = await this.prisma.$transaction(async (tx) => {
       await this.recompute.lock(tx, tournament.id);
       const previous = await tx.scoringConfig.findUnique({
         where: { tournamentId: tournament.id },
@@ -52,7 +54,7 @@ export class ScoringService {
         create: { tournamentId: tournament.id, ...rule, updatedById: user.id },
         update: { ...rule, updatedById: user.id },
       });
-      await tx.scoreAuditLog.create({
+      const entry = await tx.scoreAuditLog.create({
         data: {
           tournamentId: tournament.id,
           actorUserId: user.id,
@@ -65,7 +67,10 @@ export class ScoringService {
         },
       });
       await this.recompute.recompute(tx, tournament.id);
+      return entry.id;
     });
+    // New points: the ranking changes for everyone watching
+    this.events.publish(tournament.id, version, [{ type: 'leaderboard' }]);
     return this.get(tournament.id, ADMIN_VIEW);
   }
 }
