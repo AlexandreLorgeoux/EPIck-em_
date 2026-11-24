@@ -1,6 +1,6 @@
 # Database schema
 
-What is actually implemented in PostgreSQL today. The full target design, with every table and the reasons behind it, is in [data-model.md](./data-model.md). This page covers the sprint 2 slice: tournaments, teams, players, registrations, matches and results, with the derived bracket state (ticket #19), plus sign-in sessions (ticket #9).
+What is actually implemented in PostgreSQL today. The full target design, with every table and the reasons behind it, is in [data-model.md](./data-model.md). This page covers the sprint 2 slice: tournaments, teams, players, registrations, matches and results, with the derived bracket state (ticket #19), plus sign-in sessions (ticket #9). Sprint 3 adds predictions, scoring settings and the score audit log (ticket #56).
 
 - Source of truth: `apps/api/prisma/schema.prisma`
 - Migrations: `apps/api/prisma/migrations/`
@@ -46,6 +46,15 @@ erDiagram
   source |o--o{ player : imports
   source |o--o{ registration : imports
   source |o--o{ match_result : imports
+
+  user ||--o{ prediction : makes
+  match ||--o{ prediction : "is predicted in"
+  registration ||--o{ prediction : "is picked in"
+  tournament ||--o| scoring_config : "scores with"
+  user |o--o{ scoring_config : "last changed"
+  tournament ||--o{ score_audit_log : "logs changes of"
+  match |o--o{ score_audit_log : concerns
+  user |o--o{ score_audit_log : "acted in"
 
   game {
     uuid id PK
@@ -170,6 +179,38 @@ erDiagram
     enum state "open, assigned, bye"
     enum resolved_from
   }
+  prediction {
+    uuid id PK
+    uuid user_id FK
+    uuid match_id FK
+    uuid picked_registration_id FK
+    int score_slot_1
+    int score_slot_2
+    enum status "pending, correct, wrong, cancelled"
+    int points
+    timestamptz created_at
+    timestamptz updated_at
+    timestamptz resolved_at
+  }
+  scoring_config {
+    uuid tournament_id PK
+    int points_correct_pick
+    int exact_score_bonus
+    int round_increment
+    timestamptz updated_at
+    uuid updated_by FK
+  }
+  score_audit_log {
+    bigint id PK
+    uuid tournament_id FK
+    uuid match_id FK
+    uuid actor_user_id FK
+    enum action "result_recorded, result_corrected, scoring_changed"
+    jsonb old_value
+    jsonb new_value
+    text reason
+    timestamptz created_at
+  }
   match_outcome {
     uuid match_id PK
     enum state "pending, decided, void, stale, conflict"
@@ -185,9 +226,10 @@ Every table is one of the kinds defined in [data-model.md, section 3](./data-mod
 
 | Kind | Tables | Who writes |
 | --- | --- | --- |
-| Setup | `game`, `source`, `user`, `tournament`, `stage`, `team`, `player`, `team_member`, `match`, `match_slot` | The API, on organizer actions |
-| Raw | `registration`, `match_result`, `match_result_entrant`, `round`, `round_score` | The API, on result entry or import |
-| Derived | `slot_assignment`, `match_outcome` | The recalculation job only |
+| Setup | `game`, `source`, `user`, `tournament`, `stage`, `team`, `player`, `team_member`, `match`, `match_slot`, `scoring_config` | The API, on organizer actions |
+| Raw | `registration`, `match_result`, `match_result_entrant`, `round`, `round_score`, `prediction` (pick and exact score) | The API, on result entry, import or a user's prediction |
+| Derived | `slot_assignment`, `match_outcome`, and the outcome columns of `prediction` (`status`, `points`, `resolved_at`) | The recalculation job only |
+| History | `score_audit_log` | The API, on each change that moves points; never edited |
 | Sessions | `session` | The API, on sign-in, refresh and sign-out (outside the data model kinds) |
 
 A match slot says **where** its participant comes from (seed 3, winner of match 5). Who actually sits there is derived (`slot_assignment`), so correcting a result moves the bracket without touching the setup.
@@ -202,6 +244,10 @@ These rules live in the migration, not only in the API code:
 | Results are never edited: a correction is a new version | Triggers reject `UPDATE` and `DELETE` on `match_result`, `match_result_entrant`, `round`, `round_score` |
 | Version 2 and later give a reason and point to the version they replace | `CHECK` constraints on `match_result` |
 | Derived tables are only written by the recalculation job | Triggers reject any write unless the transaction ran `SET LOCAL app.recompute = 'on'` |
+| One prediction per user and match | Unique index on `prediction (user_id, match_id)` |
+| An exact score has both sides, and no score or points is negative | `CHECK` constraints on `prediction` and `scoring_config` |
+| A prediction is inserted `pending`; its status, points and resolution date change only in the recalculation | Trigger `guard_prediction_outcome`, same `app.recompute` setting as derived tables |
+| The score audit log is never edited or deleted | Trigger `reject_history_mutation` on `score_audit_log` |
 
 Writing derived rows from the job, with Prisma:
 
@@ -250,11 +296,23 @@ Signing in sets two httpOnly cookies. The **access token** is a signed JWT valid
 - `POST /auth/logout` and a role change set `revoked_at`, so the session cannot be refreshed any more.
 - Passwords are stored as argon2id hashes in `user.password_hash`, never in clear.
 
+## Predictions and scoring
+
+Ticket #56 stores what sprint 3 needs; the endpoints come with #49 to #52.
+
+- `prediction`: a user's pick for a match, one per user and match, with an optional exact score (slot 1, slot 2). The pick is a registration, not a slot, so a correction that changes who plays the match is visible. The user edits it until the match locks; `status`, `points` and `resolved_at` are the outcome, set by the recalculation.
+- `scoring_config`: the points of a tournament. A correct pick in round r is worth `points_correct_pick + (r - 1) * round_increment`, plus `exact_score_bonus` for the exact score. Without a row, the defaults apply: 3, 2 and 1. It is removed with a deleted draft.
+- `score_audit_log`: who did what that moves points, when, with the old and new values as JSON snapshots and the reason of a correction.
+
+## Demo data
+
+`npm run db:seed -w apps/api` fills the database in `DATABASE_URL` with a demo: the running tournament `/tournaments/coupe-de-demonstration` with 8 teams, 12 synthetic users (`is_synthetic`, no password, addresses in `.test`) who predicted every first-round match, and 2 results already entered. Everything is fictitious, and a second run does nothing. It goes through the API services (`apps/api/src/seed/demo.ts`), so it follows the same rules as the admin screens.
+
 ## Not implemented yet
 
 Left out of the sprint 2 slice, to be added with the tickets that need them:
 
-- Tables: `season`, `pool`, `station`, `source_import`, `source_record`, `dispute`, and everything about predictions, leaderboards and recalculation history (`outbox_event`, `recompute_run`).
+- Tables: `season`, `pool`, `station`, `source_import`, `source_record`, `dispute`, the Pick'em questions of the data model (`question`, `answer`, `bracket_pick`), leaderboards (sprint 3 computes the ranking from `prediction.points`) and recalculation history (`outbox_event`, `recompute_run`).
 - Columns pointing to those tables: `tournament.season_id`, `match.station_id`, `match.pool_id`, `match_slot.feeder_pool_id`, `registration.source_record_id`, `match_result.source_record_id`, `match_result.dispute_id`.
 - A separate database role for the API (section 6.7 of the data model). The triggers already block writes to derived tables.
 
