@@ -4,6 +4,8 @@ import { BracketController } from './bracket.controller.js';
 import { BracketService } from './bracket.service.js';
 import { MatchResultsController } from './match-results.controller.js';
 import { MatchResultsService } from './match-results.service.js';
+import { ScoringController } from './scoring.controller.js';
+import { ScoringService } from './scoring.service.js';
 import { TournamentTeamsController } from './tournament-teams.controller.js';
 import { TournamentTeamsService } from './tournament-teams.service.js';
 import { TournamentsController } from './tournaments.controller.js';
@@ -15,6 +17,7 @@ import { TournamentsService } from './tournaments.service.js';
     TournamentTeamsController,
     BracketController,
     MatchResultsController,
+    ScoringController,
   ],
   providers: [
     TournamentsService,
@@ -22,6 +25,7 @@ import { TournamentsService } from './tournaments.service.js';
     BracketService,
     BracketRecomputeService,
     MatchResultsService,
+    ScoringService,
   ],
 })
 export class TournamentsModule {}
