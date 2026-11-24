@@ -332,6 +332,15 @@ Corrections, ticket #51:
 - Each result entered or corrected adds a `score_audit_log` entry: `result_recorded` or `result_corrected`, the admin, the time, the reason, and the old and new values (`version`, `scores`, `winnerSlot`, team names), copied so the entry stays readable later.
 - `BracketRecomputeService.rebuild` forgets every derived value of a tournament (bracket state, prediction outcomes) and computes it again from the setup and raw results only (data model 6.6). The tests check that a chain of results, corrections and scoring changes ends in the same state as this rebuild, and that it repairs damaged derived data.
 
+Leaderboard and live updates, ticket #52 (public, with the same visibility as the tournament):
+
+| Endpoint | Does |
+| --- | --- |
+| `GET /tournaments/:id/leaderboard?page=1&pageSize=20` | Everyone who predicted, with `rank`, `user` (id and display name only), `points`, `correctPicks` and `predictions`. Ranked by points, then correct picks, then the earliest first prediction; the user id ends any tie, so the order is stable. `total` for paging, `me` for the signed-in user's own row, and the `version`. |
+| `GET /tournaments/:id/events` | Server-sent events. `sync` first, then `match-result` (with `matchId`), `bracket` and `leaderboard` right after each result or correction is committed, and `leaderboard` after a scoring change. A comment every 25 s keeps the connection open. |
+
+The version of a tournament is the id of its latest `score_audit_log` entry, so it is stored and survives a restart. Every event carries it as its id. A client that reconnects sends the last id it received (`Last-Event-ID`, which `EventSource` does by itself); the `sync` event then says `missed: true` when changes happened meanwhile, and the client refetches. The events only say what changed: clients fetch the data with the usual endpoints. They are published in the API process: running several API instances would need a shared channel (PostgreSQL `LISTEN/NOTIFY`, for example).
+
 - `prediction`: a user's pick for a match, one per user and match, with an optional exact score (slot 1, slot 2). The pick is a registration, not a slot, so a correction that changes who plays the match is visible. The user edits it until the match locks; `status`, `points` and `resolved_at` are the outcome, set by the recalculation.
 - `scoring_config`: the points of a tournament. A correct pick in round r is worth `points_correct_pick + (r - 1) * round_increment`, plus `exact_score_bonus` for the exact score. Without a row, the defaults apply: 3, 2 and 1. It is removed with a deleted draft.
 - `score_audit_log`: who did what that moves points, when, with the old and new values as JSON snapshots and the reason of a correction.
