@@ -1,6 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { computeBracket, type ReportedResult } from '../engine/bracket.js';
-import { resultWinner, type RoundScores } from '../engine/result.js';
+import {
+  DEFAULT_SCORING,
+  scorePrediction,
+  type ScoringRule,
+} from '../engine/predictions.js';
+import {
+  matchScore,
+  resultWinner,
+  type RoundScores,
+} from '../engine/result.js';
 import {
   matchKey,
   type Feeder,
@@ -11,9 +20,11 @@ import { ACTIVE_REGISTRATION } from './tournament-teams.service.js';
 
 type Tx = Prisma.TransactionClient;
 
-// Layer 1 of the cascade (docs/data-model.md, section 6), run in the
-// caller's transaction: reads the setup and the raw results of a
-// tournament, runs the engine and replaces the derived bracket rows.
+// The cascade (docs/data-model.md, section 6), run in the caller's
+// transaction: reads the setup and the raw results of a tournament, runs
+// the engine, replaces the derived bracket rows (layer 1), then resolves
+// and scores the predictions (layers 3 and 4). A result, its bracket
+// advance and its points are saved together or not at all.
 // Until the recompute job exists, it runs right after each raw write, so
 // the bracket is up to date as soon as the request returns.
 @Injectable()
@@ -83,6 +94,7 @@ export class BracketRecomputeService {
     // A void result sends the match back to pending: it is left out
     const results = new Map<string, ReportedResult>();
     const resultId = new Map<string, bigint>();
+    const resultScore = new Map<string, readonly [number, number]>();
     for (const m of matches) {
       const current = m.results[0];
       if (!current || current.outcomeKind === 'void') continue;
@@ -100,6 +112,7 @@ export class BracketRecomputeService {
         entrants: [entrant(1), entrant(2)],
       });
       resultId.set(keyOf.get(m.id)!, current.id);
+      resultScore.set(keyOf.get(m.id)!, matchScore(rounds));
     }
 
     const state = computeBracket(plan, seeds, results);
@@ -140,6 +153,88 @@ export class BracketRecomputeService {
         };
       }),
     });
+
+    // Layers 3 and 4: what each prediction is worth now
+    const rule = await this.scoringRule(tx, tournamentId);
+    const facts = new Map(
+      matches.map((m) => {
+        const key = keyOf.get(m.id)!;
+        const outcome = state.outcomes.get(key)!;
+        const participant = (slot: 1 | 2) =>
+          state.slots.get(`${key}:${slot}`)!.participant;
+        return [
+          m.id,
+          {
+            round: m.bracketRound,
+            participants: [participant(1), participant(2)] as const,
+            state: outcome.state,
+            winner: outcome.winner,
+            score: resultScore.get(key) ?? null,
+          },
+        ];
+      }),
+    );
+    await this.scorePredictions(tx, ids, facts, rule);
+  }
+
+  private async scoringRule(
+    tx: Tx,
+    tournamentId: string,
+  ): Promise<ScoringRule> {
+    const config = await tx.scoringConfig.findUnique({
+      where: { tournamentId },
+    });
+    return config ?? DEFAULT_SCORING;
+  }
+
+  // Writes only the predictions whose outcome changed, so a run that
+  // changes nothing writes nothing (data model 6.4, unchanged output)
+  private async scorePredictions(
+    tx: Tx,
+    matchIds: string[],
+    facts: Map<string, Parameters<typeof scorePrediction>[1]>,
+    rule: ScoringRule,
+  ) {
+    const predictions = await tx.prediction.findMany({
+      where: { matchId: { in: matchIds } },
+      select: {
+        id: true,
+        matchId: true,
+        pickedRegistrationId: true,
+        scoreSlot1: true,
+        scoreSlot2: true,
+        status: true,
+        points: true,
+      },
+    });
+    const resolvedAt = new Date();
+    for (const prediction of predictions) {
+      const outcome = scorePrediction(
+        {
+          picked: prediction.pickedRegistrationId,
+          score:
+            prediction.scoreSlot1 === null || prediction.scoreSlot2 === null
+              ? null
+              : [prediction.scoreSlot1, prediction.scoreSlot2],
+        },
+        facts.get(prediction.matchId)!,
+        rule,
+      );
+      if (
+        outcome.status === prediction.status &&
+        outcome.points === prediction.points
+      ) {
+        continue;
+      }
+      await tx.prediction.update({
+        where: { id: prediction.id },
+        data: {
+          status: outcome.status,
+          points: outcome.points,
+          resolvedAt: outcome.status === 'pending' ? null : resolvedAt,
+        },
+      });
+    }
   }
 }
 

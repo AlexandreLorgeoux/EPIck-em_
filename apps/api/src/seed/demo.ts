@@ -62,8 +62,8 @@ export interface DemoSummary {
 /**
  * Creates the demo tournament through the same services as the admin
  * screens, so it follows every rule of the API. Does nothing when it
- * already exists. Predictions on played matches stay pending: resolving
- * them is the recalculation's job (ticket #50).
+ * already exists. Entering the results resolves the predictions on those
+ * matches, like for any result.
  */
 export async function seedDemoTournament(
   app: INestApplicationContext,
@@ -164,7 +164,7 @@ export async function seedDemoTournament(
     }
   }
 
-  // A few results, so the recalculation has predictions to resolve
+  // A few results, so the demo has resolved predictions and points
   for (const match of playable.slice(0, results)) {
     const winnerSlot = draw() < 0.5 ? 1 : 2;
     await matchResults.record(

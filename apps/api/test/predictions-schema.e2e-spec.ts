@@ -68,12 +68,16 @@ describe('Predictions schema (e2e)', () => {
 
       // 8 teams: 4 first-round matches, 12 users predict each of them
       expect(await prisma.prediction.count()).toBe(48);
+      expect(await prisma.matchResult.count()).toBe(2);
+      // The 2 played matches resolve their 24 predictions (ticket #50)
       expect(
         await prisma.prediction.count({
-          where: { status: { not: 'pending' } },
+          where: { status: { in: ['correct', 'wrong'] } },
         }),
-      ).toBe(0);
-      expect(await prisma.matchResult.count()).toBe(2);
+      ).toBe(24);
+      expect(
+        await prisma.prediction.count({ where: { status: 'pending' } }),
+      ).toBe(24);
     });
 
     it('does nothing the second time', async () => {
