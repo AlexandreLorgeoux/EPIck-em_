@@ -1,4 +1,4 @@
-// Sprint 2 slice of docs/data-model.md. Tables and columns keep the
+// Sprint 2 and 3 slice of docs/data-model.md. Tables and columns keep the
 // snake_case names of the data model so raw SQL and triggers match the doc.
 
 generator client {
@@ -160,6 +160,26 @@ enum MatchState {
   @@map("match_state")
 }
 
+// Where a prediction stands once its match is played. Only the
+// recalculation moves it away from pending (see migration triggers).
+enum PredictionStatus {
+  pending
+  correct
+  wrong
+  // The match was voided or its teams changed: nobody wins or loses points
+  cancelled
+
+  @@map("prediction_status")
+}
+
+enum ScoreAuditAction {
+  result_recorded
+  result_corrected
+  scoring_changed
+
+  @@map("score_audit_action")
+}
+
 // ---------------------------------------------------------------------------
 // Setup: configuration chosen by an organizer
 // ---------------------------------------------------------------------------
@@ -209,6 +229,9 @@ model User {
   players          Player[]
   reportedResults  MatchResult[]
   sessions         Session[]
+  predictions      Prediction[]
+  scoringUpdates   ScoringConfig[]
+  auditEntries     ScoreAuditLog[]
 
   @@map("user")
 }
@@ -262,13 +285,15 @@ model Tournament {
   sourceId           String?              @map("source_id") @db.Uuid
   externalRef        String?              @map("external_ref")
 
-  game           Game           @relation(fields: [gameId], references: [id])
-  owner          User           @relation(fields: [ownerUserId], references: [id])
-  duplicatedFrom Tournament?    @relation("TournamentDuplicate", fields: [duplicatedFromId], references: [id])
-  duplicates     Tournament[]   @relation("TournamentDuplicate")
-  source         Source?        @relation(fields: [sourceId], references: [id])
+  game           Game            @relation(fields: [gameId], references: [id])
+  owner          User            @relation(fields: [ownerUserId], references: [id])
+  duplicatedFrom Tournament?     @relation("TournamentDuplicate", fields: [duplicatedFromId], references: [id])
+  duplicates     Tournament[]    @relation("TournamentDuplicate")
+  source         Source?         @relation(fields: [sourceId], references: [id])
   stages         Stage[]
   registrations  Registration[]
+  scoringConfig  ScoringConfig?
+  auditEntries   ScoreAuditLog[]
 
   @@index([gameId])
   @@index([ownerUserId])
@@ -359,11 +384,13 @@ model Match {
   scheduledAt      DateTime? @map("scheduled_at") @db.Timestamptz(6)
   estimatedMinutes Int?      @map("estimated_minutes")
 
-  stage   Stage         @relation(fields: [stageId], references: [id])
-  slots   MatchSlot[]   @relation("MatchSlots")
-  feeds   MatchSlot[]   @relation("SlotFeederMatch")
-  results MatchResult[]
-  outcome MatchOutcome?
+  stage        Stage           @relation(fields: [stageId], references: [id])
+  slots        MatchSlot[]     @relation("MatchSlots")
+  feeds        MatchSlot[]     @relation("SlotFeederMatch")
+  results      MatchResult[]
+  outcome      MatchOutcome?
+  predictions  Prediction[]
+  auditEntries ScoreAuditLog[]
 
   @@unique([stageId, bracketRound, position])
   @@map("match")
@@ -391,6 +418,24 @@ model MatchSlot {
   @@map("match_slot")
 }
 
+// Points of a tournament's predictions. A tournament without a row uses
+// these defaults. A correct pick in round r is worth
+// points_correct_pick + (r - 1) * round_increment, plus exact_score_bonus
+// when the exact score was predicted too.
+model ScoringConfig {
+  tournamentId      String   @id @map("tournament_id") @db.Uuid
+  pointsCorrectPick Int      @default(3) @map("points_correct_pick")
+  exactScoreBonus   Int      @default(2) @map("exact_score_bonus")
+  roundIncrement    Int      @default(1) @map("round_increment")
+  updatedAt         DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  updatedById       String?  @map("updated_by") @db.Uuid
+
+  tournament Tournament @relation(fields: [tournamentId], references: [id])
+  updatedBy  User?      @relation(fields: [updatedById], references: [id])
+
+  @@map("scoring_config")
+}
+
 // ---------------------------------------------------------------------------
 // Raw: facts entered or imported. Results are append-only (see migration
 // triggers): a correction is a new MatchResult version.
@@ -416,6 +461,7 @@ model Registration {
   slotAssignments SlotAssignment[]
   wins            MatchOutcome[]       @relation("OutcomeWinner")
   losses          MatchOutcome[]       @relation("OutcomeLoser")
+  picks           Prediction[]
 
   @@unique([tournamentId, teamId])
   @@unique([tournamentId, playerId])
@@ -492,6 +538,34 @@ model RoundScore {
   @@map("round_score")
 }
 
+// A user's prediction on a match: one per user and match, edited until the
+// match locks. The pick is a registration, so a correction that changes
+// who plays the match is detected. status, points and resolved_at are set
+// only by the recalculation (trigger in the migration).
+model Prediction {
+  id                   String           @id @default(uuid(7)) @db.Uuid
+  userId               String           @map("user_id") @db.Uuid
+  matchId              String           @map("match_id") @db.Uuid
+  pickedRegistrationId String           @map("picked_registration_id") @db.Uuid
+  // Optional exact score, slot 1 then slot 2: both or neither (CHECK)
+  scoreSlot1           Int?             @map("score_slot_1")
+  scoreSlot2           Int?             @map("score_slot_2")
+  status               PredictionStatus @default(pending)
+  points               Int              @default(0)
+  createdAt            DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime         @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  resolvedAt           DateTime?        @map("resolved_at") @db.Timestamptz(6)
+
+  user   User         @relation(fields: [userId], references: [id])
+  match  Match        @relation(fields: [matchId], references: [id])
+  picked Registration @relation(fields: [pickedRegistrationId], references: [id])
+
+  @@unique([userId, matchId])
+  @@index([matchId])
+  @@index([pickedRegistrationId])
+  @@map("prediction")
+}
+
 // ---------------------------------------------------------------------------
 // Derived: written only by the recalculation job (see migration triggers)
 // ---------------------------------------------------------------------------
@@ -525,4 +599,33 @@ model MatchOutcome {
   loser  Registration? @relation("OutcomeLoser", fields: [loserRegistrationId], references: [id])
 
   @@map("match_outcome")
+}
+
+// ---------------------------------------------------------------------------
+// History: append-only (see migration triggers)
+// ---------------------------------------------------------------------------
+
+// Who changed what affects points, and when: results entered or corrected,
+// scoring changed. The values are snapshots, so the log stays readable
+// after later changes.
+model ScoreAuditLog {
+  id           BigInt           @id @default(autoincrement())
+  tournamentId String           @map("tournament_id") @db.Uuid
+  // Null for a change of the whole tournament (scoring)
+  matchId      String?          @map("match_id") @db.Uuid
+  // Null when no signed-in user did it (import, simulator)
+  actorUserId  String?          @map("actor_user_id") @db.Uuid
+  action       ScoreAuditAction
+  oldValue     Json?            @map("old_value")
+  newValue     Json?            @map("new_value")
+  reason       String?
+  createdAt    DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  tournament Tournament @relation(fields: [tournamentId], references: [id])
+  match      Match?     @relation(fields: [matchId], references: [id])
+  actor      User?      @relation(fields: [actorUserId], references: [id])
+
+  @@index([tournamentId, createdAt])
+  @@index([matchId])
+  @@map("score_audit_log")
 }
