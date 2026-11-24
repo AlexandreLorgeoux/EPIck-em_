@@ -35,6 +35,23 @@ export class BracketRecomputeService {
     await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${tournamentId}))`;
   }
 
+  // Rebuild from raw (data model 6.6): forgets every derived value of the
+  // tournament, then computes it again from the setup and the raw results
+  // only. Incremental runs after each result must end in the same state:
+  // the tests compare both.
+  async rebuild(tx: Tx, tournamentId: string) {
+    await this.lock(tx, tournamentId);
+    await tx.$executeRaw`SELECT set_config('app.recompute', 'on', true)`;
+    const ofTournament = { match: { stage: { tournamentId } } };
+    await tx.slotAssignment.deleteMany({ where: { matchSlot: ofTournament } });
+    await tx.matchOutcome.deleteMany({ where: ofTournament });
+    await tx.prediction.updateMany({
+      where: ofTournament,
+      data: { status: 'pending', points: 0, resolvedAt: null },
+    });
+    await this.recompute(tx, tournamentId);
+  }
+
   async recompute(tx: Tx, tournamentId: string) {
     await this.lock(tx, tournamentId);
     const matches = await tx.match.findMany({
