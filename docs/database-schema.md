@@ -300,6 +300,16 @@ Signing in sets two httpOnly cookies. The **access token** is a signed JWT valid
 
 Ticket #56 stores what sprint 3 needs; the endpoints come with #49 to #52.
 
+Endpoints of ticket #49, for any signed-in user whatever their role (anonymous visitors get `401`):
+
+| Endpoint | Does |
+| --- | --- |
+| `POST /predictions` `{ matchId, teamId, score? }` | Predicts the winner of a match, with an optional exact score in slot order. `409` if the user already predicted it. |
+| `PATCH /predictions/:id` `{ teamId?, score? }` | Changes one's own prediction; `score: null` removes the exact score. Someone else's prediction answers `404`, as if it did not exist. |
+| `GET /me/predictions?tournament=` | One's own predictions in bracket order, optionally for one tournament (id or slug), each with `locked`. |
+
+A match takes predictions while both its teams are known, it is not a bye, it has no result and its `scheduled_at` has not passed, by the server clock only. Otherwise the answer is `409` with `code: "prediction_locked"` and a `reason`: `started`, `played`, `teams-unknown` or `bye`. An exact score must name a winner, and that winner must be the picked team.
+
 - `prediction`: a user's pick for a match, one per user and match, with an optional exact score (slot 1, slot 2). The pick is a registration, not a slot, so a correction that changes who plays the match is visible. The user edits it until the match locks; `status`, `points` and `resolved_at` are the outcome, set by the recalculation.
 - `scoring_config`: the points of a tournament. A correct pick in round r is worth `points_correct_pick + (r - 1) * round_increment`, plus `exact_score_bonus` for the exact score. Without a row, the defaults apply: 3, 2 and 1. It is removed with a deleted draft.
 - `score_audit_log`: who did what that moves points, when, with the old and new values as JSON snapshots and the reason of a correction.
