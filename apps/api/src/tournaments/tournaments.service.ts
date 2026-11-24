@@ -132,8 +132,10 @@ export class TournamentsService {
 
   async remove(id: string) {
     await this.getDraft(id, 'deleted');
-    // A draft has no results yet, only its setup to remove with it
+    // A draft has no results or predictions yet, only its setup to remove
+    // with it
     await this.prisma.$transaction([
+      this.prisma.scoringConfig.deleteMany({ where: { tournamentId: id } }),
       this.prisma.matchSlot.deleteMany({
         where: { match: { stage: { tournamentId: id } } },
       }),
