@@ -3,6 +3,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { AuthModule } from './auth/auth.module.js';
 import { RolesGuard } from './auth/roles.guard.js';
 import { PlayersModule } from './players/players.module.js';
+import { PredictionsModule } from './predictions/predictions.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
 import { TeamsModule } from './teams/teams.module.js';
 import { TournamentsModule } from './tournaments/tournaments.module.js';
@@ -16,6 +17,7 @@ import { UsersModule } from './users/users.module.js';
     PlayersModule,
     TeamsModule,
     TournamentsModule,
+    PredictionsModule,
   ],
   controllers: [],
   providers: [{ provide: APP_GUARD, useClass: RolesGuard }],
