@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { BracketRecomputeService } from './bracket-recompute.service.js';
 import { BracketController } from './bracket.controller.js';
 import { BracketService } from './bracket.service.js';
+import { LeaderboardController } from './leaderboard.controller.js';
+import { LeaderboardService } from './leaderboard.service.js';
 import { MatchResultsController } from './match-results.controller.js';
 import { MatchResultsService } from './match-results.service.js';
 import { ScoringController } from './scoring.controller.js';
@@ -19,6 +21,7 @@ import { TournamentsService } from './tournaments.service.js';
     BracketController,
     MatchResultsController,
     ScoringController,
+    LeaderboardController,
   ],
   providers: [
     TournamentsService,
@@ -27,6 +30,7 @@ import { TournamentsService } from './tournaments.service.js';
     BracketRecomputeService,
     MatchResultsService,
     ScoringService,
+    LeaderboardService,
     TournamentEventsService,
   ],
 })
