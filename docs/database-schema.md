@@ -326,6 +326,12 @@ The recalculation that runs after a result resolves the predictions in the same 
 
 Only predictions whose status or points change are written, so a run that changes nothing writes nothing.
 
+Corrections, ticket #51:
+
+- Only an admin enters or corrects a result (`POST /matches/:id/result`, with a `reason` for a correction). The same transaction recomputes the bracket, the predictions and their points; the ranking is the sum of `prediction.points`.
+- Each result entered or corrected adds a `score_audit_log` entry: `result_recorded` or `result_corrected`, the admin, the time, the reason, and the old and new values (`version`, `scores`, `winnerSlot`, team names), copied so the entry stays readable later.
+- `BracketRecomputeService.rebuild` forgets every derived value of a tournament (bracket state, prediction outcomes) and computes it again from the setup and raw results only (data model 6.6). The tests check that a chain of results, corrections and scoring changes ends in the same state as this rebuild, and that it repairs damaged derived data.
+
 - `prediction`: a user's pick for a match, one per user and match, with an optional exact score (slot 1, slot 2). The pick is a registration, not a slot, so a correction that changes who plays the match is visible. The user edits it until the match locks; `status`, `points` and `resolved_at` are the outcome, set by the recalculation.
 - `scoring_config`: the points of a tournament. A correct pick in round r is worth `points_correct_pick + (r - 1) * round_increment`, plus `exact_score_bonus` for the exact score. Without a row, the defaults apply: 3, 2 and 1. It is removed with a deleted draft.
 - `score_audit_log`: who did what that moves points, when, with the old and new values as JSON snapshots and the reason of a correction.
