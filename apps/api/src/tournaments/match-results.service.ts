@@ -14,6 +14,7 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import { BracketRecomputeService } from './bracket-recompute.service.js';
 import { BracketService } from './bracket.service.js';
 import { RecordResultDto } from './dto/record-result.dto.js';
+import { TournamentEventsService } from './tournament-events.service.js';
 
 const teamName = { team: { select: { name: true } } } as const;
 
@@ -28,6 +29,7 @@ export class MatchResultsService {
     private readonly prisma: PrismaService,
     private readonly recompute: BracketRecomputeService,
     private readonly bracket: BracketService,
+    private readonly events: TournamentEventsService,
   ) {}
 
   // Saves the raw result and moves the winner forward, in one transaction.
@@ -56,7 +58,7 @@ export class MatchResultsService {
     if (!match) throw new NotFoundException(`No match ${matchId}`);
     const { tournamentId } = match.stage;
 
-    await this.prisma.$transaction(async (tx) => {
+    const version = await this.prisma.$transaction(async (tx) => {
       // Read under the lock, so the checks still hold when the result is saved
       await this.recompute.lock(tx, tournamentId);
       const current = await tx.match.findUniqueOrThrow({
@@ -144,7 +146,7 @@ export class MatchResultsService {
       });
       // Who changed what, when and why (ticket #51): a copy of the values,
       // so the log stays readable whatever changes later
-      await tx.scoreAuditLog.create({
+      const entry = await tx.scoreAuditLog.create({
         data: {
           tournamentId,
           matchId,
@@ -177,7 +179,15 @@ export class MatchResultsService {
         },
       });
       await this.recompute.recompute(tx, tournamentId);
+      return entry.id;
     });
+    // Committed: everyone watching refetches the result, the bracket and
+    // the ranking (ticket #52)
+    this.events.publish(tournamentId, version, [
+      { type: 'match-result', data: { matchId } },
+      { type: 'bracket' },
+      { type: 'leaderboard' },
+    ]);
     return this.bracket.get(tournamentId, user);
   }
 }
