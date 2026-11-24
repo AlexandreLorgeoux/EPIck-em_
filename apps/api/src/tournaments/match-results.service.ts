@@ -5,11 +5,22 @@ import {
 } from '@nestjs/common';
 import type { AuthUser } from '../auth/auth-user.js';
 import { fieldException } from '../common/validation-errors.js';
-import { roundsWinner } from '../engine/result.js';
+import {
+  matchScore,
+  roundsWinner,
+  type RoundScores,
+} from '../engine/result.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { BracketRecomputeService } from './bracket-recompute.service.js';
 import { BracketService } from './bracket.service.js';
 import { RecordResultDto } from './dto/record-result.dto.js';
+
+const teamName = { team: { select: { name: true } } } as const;
+
+const scoreOf = (
+  round: { scores: { slotPosition: number; score: number }[] },
+  slot: number,
+) => round.scores.find((s) => s.slotPosition === slot)?.score ?? 0;
 
 @Injectable()
 export class MatchResultsService {
@@ -55,11 +66,30 @@ export class MatchResultsService {
           results: {
             orderBy: { version: 'desc' },
             take: 1,
-            select: { id: true, version: true },
+            select: {
+              id: true,
+              version: true,
+              declaredWinnerSlot: true,
+              rounds: {
+                orderBy: { number: 'asc' },
+                select: {
+                  scores: { select: { slotPosition: true, score: true } },
+                },
+              },
+              entrants: {
+                orderBy: { slotPosition: 'asc' },
+                select: { registration: { select: teamName } },
+              },
+            },
           },
           slots: {
             orderBy: { position: 'asc' },
-            select: { position: true, assignment: true },
+            select: {
+              position: true,
+              assignment: {
+                include: { registration: { select: teamName } },
+              },
+            },
           },
         },
       });
@@ -110,6 +140,40 @@ export class MatchResultsService {
               },
             },
           },
+        },
+      });
+      // Who changed what, when and why (ticket #51): a copy of the values,
+      // so the log stays readable whatever changes later
+      await tx.scoreAuditLog.create({
+        data: {
+          tournamentId,
+          matchId,
+          actorUserId: user.id,
+          action: previous ? 'result_corrected' : 'result_recorded',
+          oldValue: previous
+            ? {
+                version: previous.version,
+                scores: matchScore(
+                  previous.rounds.map((round): RoundScores => [
+                    scoreOf(round, 1),
+                    scoreOf(round, 2),
+                  ]),
+                ),
+                winnerSlot: previous.declaredWinnerSlot,
+                teams: previous.entrants.map(
+                  (e) => e.registration.team?.name ?? null,
+                ),
+              }
+            : undefined,
+          newValue: {
+            version: (previous?.version ?? 0) + 1,
+            scores: [first, second],
+            winnerSlot: dto.winnerSlot,
+            teams: current.slots.map(
+              (s) => s.assignment?.registration?.team?.name ?? null,
+            ),
+          },
+          reason: dto.reason,
         },
       });
       await this.recompute.recompute(tx, tournamentId);
