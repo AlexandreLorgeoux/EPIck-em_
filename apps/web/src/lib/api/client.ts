@@ -3,11 +3,11 @@ import { sessionHandlers, singleFlight } from "./session";
 
 // In the browser, calls go to /api, which Next.js forwards to the API
 // (next.config.ts), so the session cookies stay on the site's own origin
-const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? "/api";
+export const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? "/api";
 
 async function refreshThroughApi() {
   try {
-    const res = await fetch(`${baseUrl}/auth/refresh`, {
+    const res = await fetch(`${apiBaseUrl}/auth/refresh`, {
       method: "POST",
       credentials: "include",
     });
@@ -34,4 +34,7 @@ const renewSession = singleFlight(async () => {
  *
  * Server components use getServerApi() from './server' instead.
  */
-export const api = createApiClient({ baseUrl, onUnauthorized: renewSession });
+export const api = createApiClient({
+  baseUrl: apiBaseUrl,
+  onUnauthorized: renewSession,
+});
