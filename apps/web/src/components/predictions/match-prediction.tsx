@@ -31,24 +31,26 @@ export function MatchPrediction({
   const [editing, setEditing] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
-  // Set when the form closes: the button is back only after the next render
-  const returnFocus = useRef(false);
+  const open = match.predictionLock === null;
+  const showForm = editing && open;
+  const formShown = useRef(false);
 
+  // The form closed, or a live update locked the match: focus, if it was
+  // in the form, is not lost
   useEffect(() => {
-    if (editing || !returnFocus.current) return;
-    returnFocus.current = false;
-    (buttonRef.current ?? textRef.current)?.focus();
-  }, [editing]);
+    if (formShown.current && !showForm) {
+      const focused = document.activeElement;
+      if (!focused || focused === document.body)
+        (buttonRef.current ?? textRef.current)?.focus();
+    }
+    formShown.current = showForm;
+  }, [showForm]);
 
-  function close() {
-    returnFocus.current = true;
-    setEditing(false);
-  }
+  const close = () => setEditing(false);
 
   if (match.predictionLock === "bye") return null;
 
-  const open = match.predictionLock === null;
-  if (editing && open) {
+  if (showForm) {
     return (
       <PredictionForm
         match={match}

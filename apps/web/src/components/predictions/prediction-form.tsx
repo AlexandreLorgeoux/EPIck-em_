@@ -98,9 +98,9 @@ export function PredictionForm({
           Qui va gagner ?
         </p>
         {match.slots.map(
-          ({ team, position }) =>
+          ({ team }) =>
             team && (
-              <label key={position} className="oc-pick">
+              <label key={team.id} className="oc-pick">
                 <input
                   type="radio"
                   name="teamId"

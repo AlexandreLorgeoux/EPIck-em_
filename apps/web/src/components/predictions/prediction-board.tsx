@@ -2,7 +2,10 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Icon } from "@/components/brand/icon";
+import { announceChanges, championOf } from "@/components/bracket/bracket-text";
 import { BracketSwitcher } from "@/components/bracket/bracket-switcher";
+import { LiveStatus } from "@/components/live/live-status";
 import { ErrorMessage } from "@/components/messages";
 import { buttonClass } from "@/components/styles";
 import { apiErrorMessage } from "@/components/toast/api-error-message";
@@ -10,81 +13,129 @@ import { api } from "@/lib/api/client";
 import type { Bracket, Prediction, Tournament } from "@/lib/api/models";
 import { useAuth } from "@/lib/auth/auth-provider";
 import { loginPath } from "@/lib/auth/return-path";
+import { useAnnouncer } from "@/lib/live/use-announcer";
+import { useTournamentStream } from "@/lib/live/use-tournament-stream";
 import { routes } from "@/lib/routes";
 import { MatchPrediction } from "./match-prediction";
 import { MyPredictions } from "./my-predictions";
 
-// What a signed-in user sees: the bracket as it is now, since the page's
-// own copy is cached, and their predictions by match
+// A signed-in user's predictions by match
 interface Mine {
   userId: string;
-  bracket: Bracket;
   predictions: Map<string, Prediction>;
 }
 
 /**
- * The public bracket and, for a signed-in user, their prediction on each
- * match. Visitors and users whose predictions did not load still get the
- * bracket.
+ * The public bracket, kept up to date by the live events, and, for a
+ * signed-in user, their prediction on each match. Visitors and users whose
+ * predictions did not load still get the bracket.
  */
 export function PredictionBoard({
   tournament,
-  bracket,
+  bracket: initial,
 }: {
   tournament: Pick<Tournament, "id" | "slug">;
+  // From the page, which is cached: read again as soon as possible
   bracket: Bracket;
 }) {
   const { user, loading } = useAuth();
   const userId = user?.id;
   const { id, slug } = tournament;
+  const [fresh, setFresh] = useState<Bracket | null>(null);
   const [mine, setMine] = useState<Mine | null>(null);
   const [error, setError] = useState("");
   const [showMine, setShowMine] = useState(false);
+  const [updates, setUpdates] = useState(0);
+  const { message, announce } = useAnnouncer();
   const mineButton = useRef<HTMLButtonElement>(null);
+  // The last call wins: an older answer never replaces a newer one
+  const running = useRef<AbortController>(undefined);
+  // What was last read, and what listeners were last told about
+  const latest = useRef<Bracket | null>(null);
+  const said = useRef<Bracket | null>(null);
+  const loadedFor = useRef<string>(undefined);
 
-  const load = useCallback(
-    async (signal?: AbortSignal) => {
-      if (!userId) return;
-      try {
-        const [fresh, predictions] = await Promise.all([
-          api.get<Bracket>(`/tournaments/${id}/bracket`, { signal }),
-          api.get<Prediction[]>("/me/predictions", {
-            query: { tournament: id },
-            signal,
-          }),
-        ]);
-        if (signal?.aborted) return;
+  // Rejects when it fails, after showing the error unless there already
+  // are predictions on screen
+  const read = useCallback(async () => {
+    running.current?.abort();
+    const controller = new AbortController();
+    running.current = controller;
+    const { signal } = controller;
+    try {
+      const [bracket, predictions] = await Promise.all([
+        api.get<Bracket>(`/tournaments/${id}/bracket`, { signal }),
+        userId
+          ? api.get<Prediction[]>("/me/predictions", {
+              query: { tournament: id },
+              signal,
+            })
+          : null,
+      ]);
+      if (signal.aborted) return;
+      setFresh(bracket);
+      latest.current = bracket;
+      // Nothing to say about the first read: it only replaces a cached copy
+      said.current ??= bracket;
+      if (userId && predictions) {
         setMine({
           userId,
-          bracket: fresh,
           predictions: new Map(predictions.map((p) => [p.match.id, p])),
         });
-        setError("");
-      } catch (caught) {
-        if (signal?.aborted) return;
+        loadedFor.current = userId;
+      }
+      setError("");
+    } catch (caught) {
+      if (signal.aborted) return;
+      if (userId && loadedFor.current !== userId)
         setError(
           apiErrorMessage(
             caught,
             "Impossible de charger tes pronostics. Réessaie dans un instant.",
           ),
         );
-      }
-    },
-    [id, userId],
-  );
+      throw caught;
+    } finally {
+      if (running.current === controller) running.current = undefined;
+    }
+  }, [id, userId]);
 
   useEffect(() => {
-    const controller = new AbortController();
+    if (!userId) return;
+    // The error is on screen, with a button to retry
     // eslint-disable-next-line react-hooks/set-state-in-effect -- set after the calls
-    void load(controller.signal);
-    return () => controller.abort();
-  }, [load]);
+    read().catch(() => {});
+    return () => running.current?.abort();
+  }, [read, userId]);
+
+  const status = useTournamentStream(
+    id,
+    useCallback(async () => {
+      await read();
+      setUpdates((count) => count + 1);
+      announce(() => {
+        if (!said.current || !latest.current) return "";
+        const text = announceChanges(said.current, latest.current);
+        said.current = latest.current;
+        return text;
+      });
+    }, [read, announce]),
+  );
 
   // Never the predictions of the user signed in before
   const current = mine && mine.userId === userId ? mine : null;
+  const bracket = fresh ?? initial;
+  const champion = championOf(bracket);
 
   return (
     <>
+      <LiveStatus status={status} announcement={message} />
+      {champion && (
+        <p className="oc-card heading flex items-center gap-2 border-2 border-brand text-brand">
+          <Icon name="check" />
+          {champion} remporte le tournoi.
+        </p>
+      )}
       {!loading && !user && (
         <p>
           <Link
@@ -120,7 +171,7 @@ export function PredictionBoard({
                   // This button goes away: focus the one that stays
                   mineButton.current?.focus();
                   setError("");
-                  void load();
+                  read().catch(() => {});
                 }}
               >
                 Réessayer
@@ -130,14 +181,14 @@ export function PredictionBoard({
         </div>
       )}
       <BracketSwitcher
-        bracket={current?.bracket ?? bracket}
+        bracket={bracket}
         renderPrediction={
           current
             ? (match) => (
                 <MatchPrediction
                   match={match}
                   prediction={current.predictions.get(match.id)}
-                  onSaved={(saved) =>
+                  onSaved={(saved) => {
                     setMine(
                       (before) =>
                         before && {
@@ -147,15 +198,19 @@ export function PredictionBoard({
                             saved,
                           ),
                         },
-                    )
-                  }
-                  onRefused={() => load()}
+                    );
+                    // An answer on its way may not have this prediction
+                    if (running.current) read().catch(() => {});
+                  }}
+                  onRefused={() => read().catch(() => {})}
                 />
               )
             : undefined
         }
       />
-      {user && showMine && <MyPredictions onClose={() => setShowMine(false)} />}
+      {user && showMine && (
+        <MyPredictions updates={updates} onClose={() => setShowMine(false)} />
+      )}
     </>
   );
 }

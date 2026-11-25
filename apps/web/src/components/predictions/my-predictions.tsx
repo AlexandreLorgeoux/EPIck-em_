@@ -43,17 +43,32 @@ function byTournament(predictions: Prediction[]) {
 }
 
 // The window with all the user's predictions, read again at each opening
-export function MyPredictions({ onClose }: { onClose: () => void }) {
+export function MyPredictions({
+  updates,
+  onClose,
+}: {
+  // Grows with each live change: the list is read again
+  updates: number;
+  onClose: () => void;
+}) {
   const [loaded, setLoaded] = useState<Loaded>({ kind: "loading" });
   const active = useRef(true);
 
   useEffect(() => {
     active.current = true;
-    loadMine().then((next) => active.current && setLoaded(next));
+    let current = true;
+    loadMine().then((next) => {
+      if (!current) return;
+      // A failed update keeps the list on screen
+      setLoaded((before) =>
+        next.kind === "error" && before.kind === "ready" ? before : next,
+      );
+    });
     return () => {
+      current = false;
       active.current = false;
     };
-  }, []);
+  }, [updates]);
 
   function retry(button: HTMLButtonElement) {
     // The button goes away: keep focus in the window
