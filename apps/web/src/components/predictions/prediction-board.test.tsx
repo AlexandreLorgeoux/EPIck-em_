@@ -2,8 +2,16 @@
  * @jest-environment jsdom
  */
 import "@/test/mock-navigation";
-import { afterEach, beforeAll, describe, expect, it } from "@jest/globals";
 import {
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+} from "@jest/globals";
+import {
+  act,
   cleanup,
   render,
   screen,
@@ -14,6 +22,7 @@ import userEvent from "@testing-library/user-event";
 import type { Bracket, BracketMatch, Prediction } from "@/lib/api/models";
 import { AuthProvider } from "@/lib/auth/auth-provider";
 import { expectNoAxeViolations } from "@/test/axe";
+import { FakeEventSource } from "@/test/fake-event-source";
 import { fakeApi, signedOut, user } from "@/test/fake-api";
 import { toastMessages, withToasts } from "@/test/toasts";
 import { PredictionBoard } from "./prediction-board";
@@ -115,6 +124,8 @@ beforeAll(() => {
     this.open = false;
   };
 });
+
+beforeEach(() => FakeEventSource.install());
 
 afterEach(cleanup);
 
@@ -235,6 +246,73 @@ describe("PredictionBoard", () => {
     // The bracket has it too
     await ui.click(screen.getByRole("button", { name: "Arbre" }));
     expect(card(1).getByText("Alpha (2 – 1)")).toBeTruthy();
+  });
+
+  it("updates the bracket, predictions and window live, in one sentence", async () => {
+    const fake = signedIn([prediction(1)]);
+    const { ui } = renderBoard();
+    await screen.findByRole("button", {
+      name: "Modifier mon pronostic, Match 1",
+    });
+    act(() => FakeEventSource.last.sync("1"));
+    expect(screen.getByText("En direct")).toBeTruthy();
+    await waitFor(() =>
+      expect(fake.count("GET /tournaments/t1/bracket")).toBe(2),
+    );
+
+    await ui.click(screen.getByRole("button", { name: "Mes pronostics" }));
+    const dialog = screen.getByRole("dialog");
+    expect(await within(dialog).findByText("Ouvert")).toBeTruthy();
+    fake.set("GET /tournaments/t1/bracket", [
+      200,
+      bracketOf(match(1, "played"), ...bracket.rounds[0].matches.slice(1)),
+    ]);
+    fake.set("GET /me/predictions", [
+      200,
+      [prediction(1, { locked: true, status: "correct", points: 3 })],
+    ]);
+    act(() => FakeEventSource.last.change("2"));
+
+    expect(await within(dialog).findByText("Juste")).toBeTruthy();
+    expect(card(1).getByText("Juste")).toBeTruthy();
+    expect(card(1).getByText(/3 points/)).toBeTruthy();
+    // The three events of one result are one read and one sentence
+    expect(fake.count("GET /tournaments/t1/bracket")).toBe(3);
+    await waitFor(() =>
+      expect(
+        screen.getByRole("status", { name: "Mises à jour", hidden: true })
+          .textContent,
+      ).toContain("Alpha"),
+    );
+    // Live updates are not toasts
+    expect(toastMessages("polite")).toEqual([]);
+  });
+
+  it("does not lose focus when a live update locks the match being edited", async () => {
+    const fake = signedIn([]);
+    const { ui } = renderBoard();
+    await ui.click(await predictButton(1));
+    fake.set("GET /tournaments/t1/bracket", [
+      200,
+      bracketOf(match(1, "started")),
+    ]);
+    act(() => FakeEventSource.last.sync("1"));
+    await waitFor(() => expect(card(1).getByText("Verrouillé")).toBeTruthy());
+    expect(document.activeElement?.textContent).toContain("Verrouillé");
+  });
+
+  it("gives visitors a live bracket too", async () => {
+    fakeApi({
+      "GET /auth/me": [401, signedOut],
+      "POST /auth/refresh": [401, signedOut],
+      "GET /tournaments/t1/bracket": [200, bracketOf(match(9, null))],
+    });
+    renderBoard();
+    await screen.findByRole("link", { name: "Connecte-toi" });
+    act(() => FakeEventSource.last.sync("1"));
+    expect(
+      await screen.findByRole("heading", { name: "Match 9" }),
+    ).toBeTruthy();
   });
 
   it("cancels with Escape, without saving, and gives focus back", async () => {
