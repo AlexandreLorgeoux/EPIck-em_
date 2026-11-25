@@ -3,9 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
-import { Icon } from "@/components/brand/icon";
-import { championOf } from "@/components/bracket/bracket-text";
 import { PredictionBoard } from "@/components/predictions/prediction-board";
+import { TournamentNav } from "@/components/tournament-nav";
 import { StatusBadge, formatDate } from "@/components/tournament-status";
 import { getPublicTournament } from "@/lib/api/public";
 import { routes } from "@/lib/routes";
@@ -29,7 +28,6 @@ async function Tournament({ params }: { params: Params }) {
   const data = await getPublicTournament(slug);
   if (!data) notFound();
   const { tournament, bracket } = data;
-  const winner = bracket && championOf(bracket);
 
   return (
     <>
@@ -46,12 +44,7 @@ async function Tournament({ params }: { params: Params }) {
         {tournament.description && <p>{tournament.description}</p>}
       </header>
 
-      {winner && (
-        <p className="oc-card heading flex items-center gap-2 border-2 border-brand text-brand">
-          <Icon name="check" />
-          {winner} remporte le tournoi.
-        </p>
-      )}
+      <TournamentNav slug={slug} current="matches" />
 
       <section
         aria-labelledby="results-heading"

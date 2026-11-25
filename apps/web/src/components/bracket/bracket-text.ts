@@ -117,3 +117,32 @@ export function nextText(bracket: Bracket, round: number, position: number) {
     ? `Le vainqueur joue ${next.label}`
     : "Le vainqueur remporte le tournoi";
 }
+
+/**
+ * One sentence about the results that changed between two states of the
+ * bracket, for a live region; empty when none did.
+ */
+export function announceChanges(before: Bracket, after: Bracket): string {
+  const resultOf = (match: BracketMatch) =>
+    JSON.stringify([
+      match.hasResult,
+      match.state,
+      match.slots.map((s) => [s.score, s.winner]),
+    ]);
+  const known = new Map(
+    before.rounds.flatMap((r) => r.matches).map((m) => [m.id, resultOf(m)]),
+  );
+  const changed = after.rounds
+    .flatMap((r) => r.matches)
+    .filter((m) => m.hasResult && known.get(m.id) !== resultOf(m));
+  // A stale match did not get a result: it is told with the one that did
+  const played = changed.filter((m) => !needsAttention(m));
+  const told = played.length ? played : changed;
+  if (!told.length) return "";
+  if (told.length === 1) return announceResult(after, told[0].id);
+  const champion = championOf(after);
+  return (
+    `${told.length} résultats mis à jour : ${told.map((m) => m.label).join(", ")}.` +
+    (champion ? ` ${champion} remporte le tournoi.` : "")
+  );
+}
