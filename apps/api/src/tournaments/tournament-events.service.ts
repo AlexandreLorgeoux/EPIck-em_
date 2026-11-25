@@ -1,4 +1,9 @@
-import { Injectable, OnModuleDestroy, type MessageEvent } from '@nestjs/common';
+import {
+  Injectable,
+  OnModuleDestroy,
+  ServiceUnavailableException,
+  type MessageEvent,
+} from '@nestjs/common';
 import {
   Subject,
   concat,
@@ -37,10 +42,12 @@ const KEEP_ALIVE_MS = 25_000;
 export class TournamentEventsService implements OnModuleDestroy {
   private readonly published = new Subject<Published>();
   private readonly closing = new Subject<void>();
+  private closed = false;
 
   constructor(private readonly prisma: PrismaService) {}
 
   onModuleDestroy() {
+    this.closed = true;
     // Ends the open streams, so the server can stop
     this.closing.next();
     this.closing.complete();
@@ -78,6 +85,12 @@ export class TournamentEventsService implements OnModuleDestroy {
     lastEventId?: string,
   ): Promise<Observable<MessageEvent>> {
     const version = await this.version(tournamentId);
+    // A client cut off by the shutdown may come back through a connection
+    // its proxy kept open: a stream here would never end, nor receive
+    // anything, and would stop the server from exiting
+    if (this.closed) {
+      throw new ServiceUnavailableException('The server is restarting');
+    }
     const seen = /^\d+$/.test(lastEventId ?? '') ? BigInt(lastEventId!) : null;
     const sync: MessageEvent = {
       type: 'sync',

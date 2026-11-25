@@ -62,4 +62,10 @@ describe('TournamentEventsService', () => {
     events.onModuleDestroy();
     expect((await all).map((e) => e.type)).toEqual(['sync']);
   });
+
+  it('opens no stream once the application stops', async () => {
+    const events = withVersion(1n);
+    events.onModuleDestroy();
+    await expect(events.stream('t1')).rejects.toThrow('restarting');
+  });
 });
