@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ConfirmAction } from "@/components/confirm-action";
+import { useToast } from "@/components/toast/toast-provider";
 import { api } from "@/lib/api/client";
 import { isApiError } from "@/lib/api/errors";
 import type { Player } from "@/lib/api/models";
@@ -21,8 +22,7 @@ export function PlayerEditor({ id }: { id: string }) {
   const router = useRouter();
   const [player, setPlayer] = useState<Player | null>(null);
   const [loadError, setLoadError] = useState("");
-  const [error, setError] = useState("");
-  const [notice, setNotice] = useState("");
+  const toast = useToast();
 
   useEffect(() => {
     api
@@ -32,12 +32,12 @@ export function PlayerEditor({ id }: { id: string }) {
   }, [id]);
 
   async function remove() {
-    setError("");
     try {
       await api.delete(`/players/${id}`);
+      toast.success(`Joueur ${player?.handle} supprimé.`);
       router.push(routes.admin.players);
     } catch (caught) {
-      setError(messageOf(caught));
+      toast.apiError(caught);
     }
   }
 
@@ -61,10 +61,6 @@ export function PlayerEditor({ id }: { id: string }) {
         Retour aux joueurs
       </Link>
       <h1 className="display">{player.handle}</h1>
-      <p role="status" className="sr-only">
-        {notice}
-      </p>
-      {error && <ErrorMessage>{error}</ErrorMessage>}
 
       <p>
         {player.team ? (
@@ -98,7 +94,7 @@ export function PlayerEditor({ id }: { id: string }) {
                 handle: values.handle,
               }),
             );
-            setNotice("Pseudo enregistré.");
+            return "Pseudo enregistré.";
           }}
         />
       </section>

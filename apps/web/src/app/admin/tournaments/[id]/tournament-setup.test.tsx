@@ -8,6 +8,7 @@ import type { Tournament, TournamentTeam } from "@/lib/api/models";
 import { expectNoAxeViolations } from "@/test/axe";
 import { fakeApi } from "@/test/fake-api";
 import { TournamentSetup } from "./tournament-setup";
+import { toastMessages, withToasts } from "@/test/toasts";
 
 const draft: Tournament = {
   id: "t1",
@@ -46,7 +47,9 @@ function setup(inTournament: TournamentTeam[], tournament = draft) {
     "GET /teams": [200, teamsOf("Alpha", "Bravo", "Charlie", "Delta")],
   });
   const started = jest.fn<(slug: string) => Promise<void>>(async () => {});
-  const view = render(<TournamentSetup id="t1" onStarted={started} />);
+  const view = render(
+    withToasts(<TournamentSetup id="t1" onStarted={started} />),
+  );
   return { fake, started, ui: userEvent.setup(), ...view };
 }
 
@@ -80,9 +83,7 @@ describe("TournamentSetup", () => {
 
     await waitFor(() => expect(listed()).toEqual(["Alpha", "Charlie"]));
     expect(fake.calls.at(-1)?.body).toEqual({ teamId: "id-Charlie" });
-    expect(screen.getByRole("status").textContent).toBe(
-      "Charlie ajoutée au tournoi.",
-    );
+    expect(toastMessages("polite")).toEqual(["Charlie ajoutée au tournoi."]);
   });
 
   it("removes a team", async () => {
@@ -108,9 +109,11 @@ describe("TournamentSetup", () => {
     await ui.click(screen.getByRole("button", { name: "Monter Charlie" }));
     await ui.click(screen.getByRole("button", { name: "Monter Charlie" }));
     expect(listed()).toEqual(["1. Charlie", "2. Alpha", "3. Bravo"]);
-    expect(screen.getByRole("status").textContent).toBe(
-      "Charlie est tête de série 1.",
-    );
+    // Not saved yet: said by the page itself, not by a toast
+    expect(
+      screen.getByText("Charlie est tête de série 1.").getAttribute("role"),
+    ).toBe("status");
+    expect(toastMessages("polite")).toEqual([]);
 
     await ui.click(screen.getByRole("button", { name: "Générer l'arbre" }));
     // Nothing is sent before the confirmation
@@ -148,9 +151,9 @@ describe("TournamentSetup", () => {
     // Frozen once started: no more changes offered
     expect(screen.queryByRole("button", { name: /Retirer/ })).toBeNull();
     expect(screen.queryByLabelText("Équipe à ajouter")).toBeNull();
-    expect(screen.getByRole("status").textContent).toBe(
+    expect(toastMessages("polite")).toEqual([
       "Arbre généré : le tournoi est en cours.",
-    );
+    ]);
   });
 
   it("draws the seeds when seeding is automatic", async () => {
@@ -211,8 +214,10 @@ describe("TournamentSetup", () => {
     await ui.click(
       screen.getByRole("button", { name: "Confirmer la génération" }),
     );
-    expect((await screen.findByRole("alert")).textContent).toBe(
-      "Ce tournoi est en cours : seul un brouillon peut encore changer.",
+    await waitFor(() =>
+      expect(toastMessages("error")).toEqual([
+        "Ce tournoi est en cours : seul un brouillon peut encore changer.",
+      ]),
     );
   });
 

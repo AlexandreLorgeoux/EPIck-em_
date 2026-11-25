@@ -16,7 +16,8 @@ export function PlayerForm({
 }: {
   player?: Player;
   submitLabel: string;
-  onSubmit: (values: FormValues) => Promise<void>;
+  // Resolves to the message of the success toast
+  onSubmit: (values: FormValues) => Promise<string | void>;
 }) {
   const form = useApiForm(labels);
   return (
@@ -42,7 +43,9 @@ export function PlayerForm({
           />
         )}
       </FormField>
-      {form.formError && <ErrorMessage>{form.formError}</ErrorMessage>}
+      {form.formError && (
+        <ErrorMessage announce={false}>{form.formError}</ErrorMessage>
+      )}
       <button
         type="submit"
         disabled={form.pending}

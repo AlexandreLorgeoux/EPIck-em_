@@ -9,6 +9,7 @@ import type { Player, Team } from "@/lib/api/models";
 import { expectNoAxeViolations } from "@/test/axe";
 import { fakeApi } from "@/test/fake-api";
 import { TeamEditor } from "./team-editor";
+import { toastMessages, withToasts } from "@/test/toasts";
 
 const member = (id: string, handle: string) => ({
   id,
@@ -47,7 +48,7 @@ function setup(current: Team = team) {
     "GET /teams/t1": [200, current],
     "GET /players": [200, players],
   });
-  const view = render(<TeamEditor id="t1" />);
+  const view = render(withToasts(<TeamEditor id="t1" />));
   return { fake, ui: userEvent.setup(), ...view };
 }
 
@@ -97,9 +98,7 @@ describe("TeamEditor", () => {
     expect(
       fake.calls.find((c) => c.route === "POST /teams/t1/members")?.body,
     ).toEqual({ playerId: "p4", isSubstitute: true, role: "Gardien" });
-    expect(screen.getByRole("status").textContent).toBe(
-      "Mistral ajouté à l'équipe.",
-    );
+    expect(toastMessages("polite")).toEqual(["Mistral ajouté à l'équipe."]);
   });
 
   it("removes a member", async () => {
@@ -181,8 +180,10 @@ describe("TeamEditor", () => {
     await ui.click(
       screen.getByRole("button", { name: "Supprimer définitivement" }),
     );
-    expect((await screen.findByRole("alert")).textContent).toBe(
-      "Cette équipe est inscrite à 1 tournoi : retire-la de ce tournoi avant de supprimer.",
+    await waitFor(() =>
+      expect(toastMessages("error")).toEqual([
+        "Cette équipe est inscrite à 1 tournoi : retire-la de ce tournoi avant de supprimer.",
+      ]),
     );
     expect(mockRouter.push).not.toHaveBeenCalled();
   });

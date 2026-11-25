@@ -3,6 +3,7 @@
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import { ErrorMessage, FieldError } from "@/components/messages";
 import { primaryButtonClass } from "@/components/styles";
+import { useToast } from "@/components/toast/toast-provider";
 import { isApiError } from "@/lib/api/errors";
 import { SESSION_EXPIRED_MESSAGE, useAuth } from "@/lib/auth/auth-provider";
 
@@ -10,6 +11,7 @@ type FieldErrors = { email?: string; password?: string };
 
 export function LoginForm() {
   const { login, sessionExpired } = useAuth();
+  const toast = useToast();
   const headingRef = useRef<HTMLHeadingElement>(null);
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
@@ -36,20 +38,26 @@ export function LoginForm() {
         String(form.get("password") ?? ""),
         returnTo,
       );
+      toast.success("Te voilà connecté.");
     } catch (caught) {
+      // A 401 here is wrong credentials, not an expired session
       if (isApiError(caught) && caught.status === 401) {
-        setError("E-mail ou mot de passe incorrect. Vérifie-les et réessaie.");
+        const message =
+          "E-mail ou mot de passe incorrect. Vérifie-les et réessaie.";
+        setError(message);
+        toast.error(message);
       } else if (isApiError(caught) && caught.status === 400) {
         setFieldErrors({
           email: caught.fieldError("email"),
           password: caught.fieldError("password"),
         });
+        toast.apiError(caught);
       } else {
-        setError(
-          isApiError(caught)
-            ? caught.message
-            : "La connexion a échoué. Réessaie dans un instant.",
-        );
+        const message = isApiError(caught)
+          ? caught.message
+          : "La connexion a échoué. Réessaie dans un instant.";
+        setError(message);
+        toast.error(message);
       }
     } finally {
       setPending(false);
@@ -110,7 +118,7 @@ export function LoginForm() {
           )}
         </div>
 
-        {error && <ErrorMessage>{error}</ErrorMessage>}
+        {error && <ErrorMessage announce={false}>{error}</ErrorMessage>}
 
         <button type="submit" disabled={pending} className={primaryButtonClass}>
           {pending ? "Connexion…" : "Se connecter"}

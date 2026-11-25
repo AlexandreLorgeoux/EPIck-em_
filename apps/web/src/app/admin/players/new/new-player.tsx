@@ -23,6 +23,7 @@ export function NewPlayer() {
         onSubmit={async (values) => {
           await api.post<Player>("/players", { handle: values.handle });
           router.push(routes.admin.players);
+          return `Joueur ${values.handle.trim()} créé.`;
         }}
       />
     </div>

@@ -36,6 +36,7 @@ export function TournamentForm() {
       endsAt: toIso(values.endsAt),
     });
     router.push(routes.admin.tournament(created.id));
+    return `Tournoi ${created.name} créé en brouillon.`;
   });
 
   return (
@@ -111,7 +112,9 @@ export function TournamentForm() {
           )}
         </FormField>
 
-        {form.formError && <ErrorMessage>{form.formError}</ErrorMessage>}
+        {form.formError && (
+          <ErrorMessage announce={false}>{form.formError}</ErrorMessage>
+        )}
 
         <button
           type="submit"

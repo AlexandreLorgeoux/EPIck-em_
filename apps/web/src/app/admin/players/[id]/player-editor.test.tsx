@@ -9,6 +9,7 @@ import type { Player } from "@/lib/api/models";
 import { expectNoAxeViolations } from "@/test/axe";
 import { fakeApi } from "@/test/fake-api";
 import { PlayerEditor } from "./player-editor";
+import { toastMessages, withToasts } from "@/test/toasts";
 
 const kestrel: Player = {
   id: "p1",
@@ -25,7 +26,7 @@ const kestrel: Player = {
 
 function setup() {
   const fake = fakeApi({ "GET /players/p1": [200, kestrel] });
-  const view = render(<PlayerEditor id="p1" />);
+  const view = render(withToasts(<PlayerEditor id="p1" />));
   return { fake, ui: userEvent.setup(), ...view };
 }
 
@@ -82,8 +83,10 @@ describe("PlayerEditor", () => {
     await ui.click(
       screen.getByRole("button", { name: "Supprimer définitivement" }),
     );
-    expect((await screen.findByRole("alert")).textContent).toBe(
-      "Ce joueur est inscrit à 2 tournois : retire-le de ces tournois avant de supprimer.",
+    await waitFor(() =>
+      expect(toastMessages("error")).toEqual([
+        "Ce joueur est inscrit à 2 tournois : retire-le de ces tournois avant de supprimer.",
+      ]),
     );
   });
 

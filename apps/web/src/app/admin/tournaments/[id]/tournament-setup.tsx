@@ -14,6 +14,7 @@ import type {
 import { routes } from "@/lib/routes";
 import { StatusBadge, formatDate } from "@/components/tournament-status";
 import { ErrorMessage } from "@/components/messages";
+import { useToast } from "@/components/toast/toast-provider";
 import { buttonClass as button, primaryButtonClass } from "@/components/styles";
 
 const messageOf = (caught: unknown) =>
@@ -41,7 +42,7 @@ export function TournamentSetup({
   const [confirming, setConfirming] = useState(false);
   const [pending, setPending] = useState(false);
   const [loadError, setLoadError] = useState("");
-  const [error, setError] = useState("");
+  const toast = useToast();
   // Said politely by screen readers after each change
   const [notice, setNotice] = useState("");
   const ids = { pick: useId(), confirm: useId() };
@@ -79,14 +80,13 @@ export function TournamentSetup({
     }
   }, [confirming]);
 
-  // Runs one change, shows its error, and says what happened on success
+  // Runs one change, and says in a toast what happened or what went wrong
   async function run(action: () => Promise<string>) {
     setPending(true);
-    setError("");
     try {
-      setNotice(await action());
+      toast.success(await action());
     } catch (caught) {
-      setError(messageOf(caught));
+      toast.apiError(caught);
     } finally {
       setPending(false);
     }
@@ -182,10 +182,10 @@ export function TournamentSetup({
         </p>
       </header>
 
+      {/* Reordering the seeds is not saved yet: said here, not by a toast */}
       <p role="status" className="sr-only">
         {notice}
       </p>
-      {error && <ErrorMessage>{error}</ErrorMessage>}
 
       {!draft && (
         <div className="flex flex-col gap-3">

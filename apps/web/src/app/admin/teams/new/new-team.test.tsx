@@ -8,6 +8,7 @@ import userEvent from "@testing-library/user-event";
 import { expectNoAxeViolations } from "@/test/axe";
 import { fakeApi } from "@/test/fake-api";
 import { NewTeam } from "./new-team";
+import { toastMessages, withToasts } from "@/test/toasts";
 
 describe("NewTeam", () => {
   beforeEach(() => {
@@ -17,7 +18,7 @@ describe("NewTeam", () => {
   it("creates the team from the keyboard, then opens it to add players", async () => {
     const fake = fakeApi({ "POST /teams": [201, { id: "t1" }] });
     const ui = userEvent.setup();
-    render(<NewTeam />);
+    render(withToasts(<NewTeam />));
 
     // Back link, then the name field
     await ui.tab();
@@ -31,6 +32,9 @@ describe("NewTeam", () => {
       expect(mockRouter.push).toHaveBeenCalledWith("/admin/teams/t1"),
     );
     expect(fake.calls[0].body).toEqual({ name: "Marmottes", tag: "MRM" });
+    expect(toastMessages("polite")).toEqual([
+      "Équipe Marmottes créée : ajoute maintenant ses joueurs.",
+    ]);
   });
 
   it("leaves the tag out when empty", async () => {
