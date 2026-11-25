@@ -5,6 +5,8 @@ import {
   championOf,
   matchStatus,
   roundName,
+  feederMatch,
+  nextText,
 } from "./bracket-text";
 
 const slot = (
@@ -128,5 +130,55 @@ describe("championOf", () => {
       },
     );
     expect(championOf(bracket(won, final))).toBe("Bravo");
+  });
+});
+
+describe("the path of the bracket", () => {
+  // 8 teams: matches 1 to 4, then 5 and 6, then the final
+  const label = (round: number, position: number) =>
+    `Match ${[0, 4, 6][round - 1] + position}`;
+  const paths: Bracket = {
+    stage: {
+      id: "s1",
+      name: "Bracket",
+      format: "single_elim",
+      seeding: "auto",
+    },
+    rounds: [4, 2, 1].map((count, i) => ({
+      round: i + 1,
+      matches: Array.from({ length: count }, (_, p) => ({
+        id: `r${i + 1}m${p + 1}`,
+        label: label(i + 1, p + 1),
+        position: p + 1,
+        state: "pending",
+        hasResult: false,
+        predictionLock: null,
+        slots: [],
+      })),
+    })),
+  };
+
+  it("says where the winner of each match goes", () => {
+    const next = paths.rounds.flatMap(({ round, matches }) =>
+      matches.map((m) => nextText(paths, round, m.position)),
+    );
+    expect(next).toEqual([
+      "Le vainqueur joue Match 5",
+      "Le vainqueur joue Match 5",
+      "Le vainqueur joue Match 6",
+      "Le vainqueur joue Match 6",
+      "Le vainqueur joue Match 7",
+      "Le vainqueur joue Match 7",
+      "Le vainqueur remporte le tournoi",
+    ]);
+  });
+
+  it("says which match gives each slot its team", () => {
+    const from = (round: number, position: number) =>
+      [1, 2].map((s) => feederMatch(paths, round, position, s)?.label);
+    expect(from(1, 1)).toEqual([undefined, undefined]);
+    expect(from(2, 1)).toEqual(["Match 1", "Match 2"]);
+    expect(from(2, 2)).toEqual(["Match 3", "Match 4"]);
+    expect(from(3, 1)).toEqual(["Match 5", "Match 6"]);
   });
 });

@@ -206,6 +206,37 @@ describe("PredictionBoard", () => {
     });
   });
 
+  it("predicts and edits from the table", async () => {
+    const fake = signedIn([], {
+      "POST /predictions": [201, prediction(1, { score: [2, 1] })],
+    });
+    const { container, ui } = renderBoard();
+    await predictButton(1);
+    await ui.click(screen.getByRole("button", { name: "Tableau" }));
+    await ui.click(await predictButton(1));
+    const row = screen
+      .getByRole("rowheader", { name: "Match 1" })
+      .closest("tr") as HTMLElement;
+    await ui.click(within(row).getByRole("radio", { name: "Alpha" }));
+    await ui.type(within(row).getByLabelText("Score de Alpha"), "2");
+    await ui.type(within(row).getByLabelText("Score de Bravo"), "1");
+    await expectNoAxeViolations(container);
+    await ui.click(within(row).getByRole("button", { name: "Enregistrer" }));
+
+    await waitFor(() =>
+      expect(within(row).getByText("Alpha (2 – 1)")).toBeTruthy(),
+    );
+    expect(fake.count("POST /predictions")).toBe(1);
+    expect(document.activeElement).toBe(
+      within(row).getByRole("button", {
+        name: "Modifier mon pronostic, Match 1",
+      }),
+    );
+    // The bracket has it too
+    await ui.click(screen.getByRole("button", { name: "Arbre" }));
+    expect(card(1).getByText("Alpha (2 – 1)")).toBeTruthy();
+  });
+
   it("cancels with Escape, without saving, and gives focus back", async () => {
     const fake = signedIn([]);
     const { ui } = renderBoard();

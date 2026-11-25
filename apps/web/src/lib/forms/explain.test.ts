@@ -86,6 +86,22 @@ describe("explainFieldError", () => {
     );
   });
 
+  it.each([
+    ["", "Saisis un nombre, par exemple 3."],
+    ["-2", "Remplace -2 par 0 ou plus."],
+    ["150", "Remplace 150 par 100 ou moins."],
+    ["1.5", "Remplace 1,5 par 1 ou 2."],
+  ])("suggests a fix for the points %p", (value, fix) => {
+    // Whichever of its rules the API names first
+    for (const rule of ["a whole number of points", "0 or more", "100 or less"])
+      expect(
+        explainFieldError("roundIncrement", `roundIncrement must be ${rule}`, {
+          labels: { roundIncrement: "Points" },
+          values: { roundIncrement: value },
+        }),
+      ).toBe(`«Points» doit être un nombre entier de 0 à 100. ${fix}`);
+  });
+
   it("keeps a message it has no rule for", () => {
     expect(explainFieldError("name", "something new", { labels })).toBe(
       "something new",
