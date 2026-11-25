@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { Bracket, BracketMatch } from "@/lib/api/models";
 import { matchStatus, needsAttention, roundName } from "./bracket-text";
 import { MatchAction, TeamLabel, scoreText } from "./match-parts";
@@ -8,11 +9,13 @@ export function BracketView({
   bracket,
   onOpen,
   busy,
+  renderPrediction,
 }: {
   bracket: Bracket;
   // Opens the result form of a match; left out, the view is read-only
   onOpen?: (match: BracketMatch, button: HTMLButtonElement) => void;
   busy?: boolean;
+  renderPrediction?: (match: BracketMatch) => ReactNode;
 }) {
   const rounds = bracket.rounds.length;
   return (
@@ -20,7 +23,8 @@ export function BracketView({
       role="region"
       aria-label="Arbre du tournoi"
       tabIndex={0}
-      className="overflow-x-auto pb-4"
+      // relative: keeps hidden labels inside the scrolled area
+      className="relative overflow-x-auto pb-4"
     >
       <ol className="flex min-w-max gap-6">
         {bracket.rounds.map(({ round, matches }) => (
@@ -66,6 +70,7 @@ export function BracketView({
                         </span>
                       )}
                     </p>
+                    {renderPrediction?.(match)}
                     {onOpen && (
                       <MatchAction
                         match={match}

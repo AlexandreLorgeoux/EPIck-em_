@@ -30,6 +30,7 @@ const match = (
   position: 1,
   state: "pending",
   hasResult: false,
+  predictionLock: null,
   slots,
   ...extra,
 });

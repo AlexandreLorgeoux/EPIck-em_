@@ -57,6 +57,25 @@ const fieldRules: {
       "Les scores doivent être des nombres entiers, 0 ou plus : corrige le score de chaque équipe.",
   },
   {
+    pattern: /^(each score must be 1000 or less|score must be two scores)/,
+    explain: () =>
+      "Chaque score doit être un nombre entier de 0 à 1000 : remplis les deux scores, ou laisse les deux vides.",
+  },
+  {
+    pattern: /^score cannot be a tie/,
+    explain: () =>
+      "Un match a toujours un vainqueur : donne deux scores différents.",
+  },
+  {
+    pattern: /^score must give the picked team the higher score/,
+    explain: () =>
+      "L'équipe choisie doit avoir le plus haut score : change le score ou le vainqueur.",
+  },
+  {
+    pattern: /^teamId must be (a valid UUID|one of the two teams)/,
+    explain: () => "Choisis l'une des deux équipes du match.",
+  },
+  {
     pattern: /^A match cannot end in a tie/,
     explain: () =>
       "Un match ne peut pas finir à égalité : saisis le score qui a départagé les équipes.",
@@ -134,6 +153,11 @@ const messageRules: [RegExp, (match: RegExpMatchArray) => string][] = [
     /^(.+) cannot be played yet: both teams are not known$/,
     ([, match]) =>
       `${match} ne peut pas encore être joué : ses deux équipes ne sont pas connues.`,
+  ],
+  [
+    /^You already predicted (.+): change that prediction instead$/,
+    ([, match]) =>
+      `Tu as déjà un pronostic sur ${match} : modifie-le plutôt que d'en créer un autre.`,
   ],
   [
     /^Cannot reach the server/,

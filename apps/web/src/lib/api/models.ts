@@ -70,6 +70,8 @@ export type SeedingMode = "manual" | "auto";
 // GET /tournaments/:id/bracket
 export type MatchState = "pending" | "decided" | "void" | "stale" | "conflict";
 
+export type PredictionLock = "bye" | "teams-unknown" | "started" | "played";
+
 export interface BracketSlot {
   position: number;
   // open: team not known yet; bye: no opponent
@@ -87,10 +89,40 @@ export interface BracketMatch {
   state: MatchState;
   // False for a bye: decided without being played
   hasResult: boolean;
+  // Why the match takes no prediction now; null while it is open
+  predictionLock: PredictionLock | null;
   slots: BracketSlot[];
 }
 
 export interface Bracket {
   stage: { id: string; name: string; format: string; seeding: SeedingMode };
   rounds: { round: number; matches: BracketMatch[] }[];
+}
+
+// GET /me/predictions
+export type PredictionStatus = "pending" | "correct" | "wrong" | "cancelled";
+
+export interface PredictionTeam {
+  id: string;
+  name: string;
+  tag: string | null;
+}
+
+export interface Prediction {
+  id: string;
+  tournament: { id: string; slug: string; name: string };
+  match: {
+    id: string;
+    label: string;
+    round: number;
+    scheduledAt: string | null;
+    teams: (PredictionTeam | null)[];
+  };
+  // Null when the picked team no longer plays the match
+  team: PredictionTeam | null;
+  // Exact score, in slot order
+  score: [number, number] | null;
+  status: PredictionStatus;
+  points: number;
+  locked: boolean;
 }

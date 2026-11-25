@@ -4,8 +4,8 @@ import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { Icon } from "@/components/brand/icon";
-import { BracketSwitcher } from "@/components/bracket/bracket-switcher";
 import { championOf } from "@/components/bracket/bracket-text";
+import { PredictionBoard } from "@/components/predictions/prediction-board";
 import { StatusBadge, formatDate } from "@/components/tournament-status";
 import { getPublicTournament } from "@/lib/api/public";
 import { routes } from "@/lib/routes";
@@ -61,7 +61,7 @@ async function Tournament({ params }: { params: Params }) {
           Matchs et résultats
         </h2>
         {bracket ? (
-          <BracketSwitcher bracket={bracket} />
+          <PredictionBoard tournament={tournament} bracket={bracket} />
         ) : (
           <p>L&apos;arbre n&apos;est pas encore généré.</p>
         )}
