@@ -8,6 +8,8 @@ export const routes = {
   login: "/login",
   tournaments: "/tournaments",
   tournament: (slug: string) => `/tournaments/${encodeURIComponent(slug)}`,
+  leaderboard: (slug: string) =>
+    `/tournaments/${encodeURIComponent(slug)}/leaderboard`,
   // Shown, at the same URL, in place of a page the user's role cannot open
   forbidden: "/forbidden",
 
