@@ -11,6 +11,13 @@ const paths = {
       <path d="M8 11V8a4 4 0 0 1 8 0v3" />
     </>
   ),
+  // Added in the same style as the set (CHARTE.md, Icônes): a circled i
+  info: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 11v5.5M12 7.5v.01" />
+    </>
+  ),
   live: (
     <>
       <circle cx="12" cy="12" r="2.5" fill="currentColor" />

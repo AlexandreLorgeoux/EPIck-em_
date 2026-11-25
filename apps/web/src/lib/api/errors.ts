@@ -1,7 +1,11 @@
-// Body the API sends with an error (NestJS, plus `errors` per field on 400)
+// Body the API sends with an error (NestJS, plus `errors` per field on 400,
+// and a `code` with its `reason` for some conflicts, like a locked
+// prediction)
 interface ErrorBody {
   message?: string | string[];
   errors?: Record<string, string[]>;
+  code?: string;
+  reason?: string;
 }
 
 export class ApiError extends Error {
@@ -11,6 +15,9 @@ export class ApiError extends Error {
     readonly messages: string[],
     // Validation messages by field name, for forms
     readonly fieldErrors: Record<string, string[]> = {},
+    // Machine-readable kind of error, when the API gives one
+    readonly code?: string,
+    readonly reason?: string,
   ) {
     super(messages[0] ?? `The request failed (status ${status})`);
     this.name = "ApiError";
@@ -33,7 +40,13 @@ export class ApiError extends Error {
       : body.message
         ? [body.message]
         : [];
-    return new ApiError(res.status, messages, body.errors ?? {});
+    return new ApiError(
+      res.status,
+      messages,
+      body.errors ?? {},
+      body.code,
+      body.reason,
+    );
   }
 
   static network(): ApiError {

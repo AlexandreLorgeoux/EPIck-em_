@@ -52,6 +52,8 @@
     background: var(--surface);
     color: var(--ink);
     font: 400 16px/24px var(--font-body);
+    /* Room for the toast stack (ToastProvider), so it never hides content */
+    padding-bottom: var(--toast-space, 0px);
   }
   a {
     color: var(--brand);
@@ -107,5 +109,18 @@
   .display {
     font-size: 32px;
     line-height: 38px;
+  }
+}
+
+/* Toasts slide in only for those who did not ask for less motion */
+@media (prefers-reduced-motion: no-preference) {
+  .oc-toast {
+    animation: oc-toast-in 160ms ease-out;
+  }
+}
+@keyframes oc-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
   }
 }
