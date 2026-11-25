@@ -136,3 +136,23 @@ export interface Scoring {
   isDefault: boolean;
   updatedAt: string | null;
 }
+
+// GET /tournaments/:id/leaderboard
+export interface LeaderboardEntry {
+  rank: number;
+  user: { id: string; displayName: string };
+  points: number;
+  correctPicks: number;
+  predictions: number;
+}
+
+export interface Leaderboard {
+  // Same version as the live events
+  version: string;
+  page: number;
+  pageSize: number;
+  total: number;
+  entries: LeaderboardEntry[];
+  // The signed-in user's own row, wherever it is
+  me: LeaderboardEntry | null;
+}
