@@ -60,12 +60,12 @@ describe("BracketSwitcher, read-only", () => {
       .getAllByRole("columnheader")
       .map((h) => h.textContent);
     expect(header).toEqual([
-      "Tour",
       "Match",
       "Équipe 1",
       "Score",
       "Équipe 2",
       "État",
+      "Suite",
     ]);
     expect(screen.getByRole("cell", { name: "2 – 0" })).toBeTruthy();
     await expectNoAxeViolations(container);

@@ -1,6 +1,12 @@
 import type { ReactNode } from "react";
 import type { Bracket, BracketMatch } from "@/lib/api/models";
-import { matchStatus, needsAttention, roundName } from "./bracket-text";
+import {
+  feederMatch,
+  matchStatus,
+  needsAttention,
+  nextText,
+  roundName,
+} from "./bracket-text";
 import { MatchAction, TeamLabel, scoreText } from "./match-parts";
 
 // The bracket drawn as columns of rounds. Wide brackets scroll
@@ -53,7 +59,18 @@ export function BracketView({
                           key={slot.position}
                           className="flex items-baseline justify-between gap-2"
                         >
-                          <TeamLabel slot={slot} decided={decided} />
+                          <TeamLabel
+                            slot={slot}
+                            decided={decided}
+                            feeder={
+                              feederMatch(
+                                bracket,
+                                round,
+                                match.position,
+                                slot.position,
+                              )?.label
+                            }
+                          />
                           {match.hasResult && (
                             <span className="tabular text-xl font-bold">
                               {slot.score ?? 0}
@@ -69,6 +86,9 @@ export function BracketView({
                           , score {scoreText(match)}
                         </span>
                       )}
+                    </p>
+                    <p className="body-sm text-ink-soft">
+                      {nextText(bracket, round, match.position)}
                     </p>
                     {renderPrediction?.(match)}
                     {onOpen && (

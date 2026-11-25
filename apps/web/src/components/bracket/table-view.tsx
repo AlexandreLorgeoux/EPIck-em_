@@ -1,10 +1,20 @@
-import type { ReactNode } from "react";
+import { useId, type ReactNode } from "react";
 import type { Bracket, BracketMatch } from "@/lib/api/models";
-import { matchStatus, roundName } from "./bracket-text";
+import {
+  feederMatch,
+  matchStatus,
+  needsAttention,
+  nextText,
+  roundName,
+} from "./bracket-text";
 import { MatchAction, TeamLabel, scoreText } from "./match-parts";
 
-// The same matches as the bracket, one row each: easier to read with a
-// screen reader or on a small screen
+/**
+ * The same information as the bracket, one table per round: easier to read
+ * with a screen reader or on a small screen, where each row becomes a block
+ * (oc-matches). The roles are written out because changing the display of
+ * a table makes some browsers drop them.
+ */
 export function TableView({
   bracket,
   onOpen,
@@ -17,75 +27,106 @@ export function TableView({
   busy?: boolean;
   renderPrediction?: (match: BracketMatch) => ReactNode;
 }) {
-  const rounds = bracket.rounds.length;
+  const id = useId();
+  const columns = [
+    "Match",
+    "Équipe 1",
+    "Score",
+    "Équipe 2",
+    "État",
+    "Suite",
+    ...(renderPrediction ? ["Mon pronostic"] : []),
+    ...(onOpen ? ["Action"] : []),
+  ];
   return (
-    <div
-      role="region"
-      aria-label="Tableau des matchs"
-      tabIndex={0}
-      // relative: keeps hidden labels inside the scrolled area
-      className="relative overflow-x-auto"
-    >
-      <table className="oc-table">
-        <caption className="sr-only">
-          Tous les matchs, tour par tour, avec leur score et leur état
-        </caption>
-        <thead>
-          <tr>
-            {["Tour", "Match", "Équipe 1", "Score", "Équipe 2", "État"].map(
-              (title) => (
-                <th key={title} scope="col">
-                  {title}
-                </th>
-              ),
-            )}
-            {renderPrediction && <th scope="col">Mon pronostic</th>}
-            {onOpen && (
-              <th scope="col">
-                <span className="sr-only">Action</span>
-              </th>
-            )}
-          </tr>
-        </thead>
-        <tbody>
-          {bracket.rounds.flatMap(({ round, matches }) =>
-            matches.map((match) => {
-              // Badges for played matches only: a bye is decided without a winner
-              // in the sporting sense
-              const decided = match.state === "decided" && match.hasResult;
-              const [first, second] = match.slots;
-              return (
-                <tr key={match.id} className="align-top">
-                  <td>{roundName(round, rounds)}</td>
-                  <th scope="row" className="text-ink">
-                    {match.label}
+    <div className="flex flex-col gap-8">
+      {bracket.rounds.map(({ round, matches }) => (
+        <section
+          key={round}
+          aria-labelledby={`${id}-${round}`}
+          className="flex flex-col gap-2"
+        >
+          <h2 id={`${id}-${round}`} className="title">
+            {roundName(round, bracket.rounds.length)}
+          </h2>
+          <table
+            role="table"
+            aria-labelledby={`${id}-${round}`}
+            className="oc-table oc-matches"
+          >
+            <thead role="rowgroup">
+              <tr role="row">
+                {columns.map((title) => (
+                  <th key={title} scope="col" role="columnheader">
+                    {title}
                   </th>
-                  <td>
-                    <TeamLabel slot={first} decided={decided} />
-                  </td>
-                  <td className="tabular">{scoreText(match) || "—"}</td>
-                  <td>
-                    <TeamLabel slot={second} decided={decided} />
-                  </td>
-                  <td>{matchStatus(match)}</td>
-                  {renderPrediction && (
-                    <td className="min-w-64">{renderPrediction(match)}</td>
-                  )}
-                  {onOpen && (
-                    <td>
-                      <MatchAction
-                        match={match}
-                        onOpen={onOpen}
-                        disabled={busy}
-                      />
+                ))}
+              </tr>
+            </thead>
+            <tbody role="rowgroup">
+              {matches.map((match) => {
+                // Badges for played matches only: a bye is decided without a
+                // winner in the sporting sense
+                const decided = match.state === "decided" && match.hasResult;
+                const team = (slot: 1 | 2) => (
+                  <TeamLabel
+                    slot={match.slots[slot - 1]}
+                    decided={decided}
+                    feeder={
+                      feederMatch(bracket, round, match.position, slot)?.label
+                    }
+                  />
+                );
+                return (
+                  <tr key={match.id} role="row" className="align-top">
+                    <th scope="row" role="rowheader" className="text-ink">
+                      {match.label}
+                    </th>
+                    <td role="cell" data-label="Équipe 1">
+                      {team(1)}
                     </td>
-                  )}
-                </tr>
-              );
-            }),
-          )}
-        </tbody>
-      </table>
+                    <td role="cell" data-label="Score" className="tabular">
+                      {scoreText(match) || "—"}
+                    </td>
+                    <td role="cell" data-label="Équipe 2">
+                      {team(2)}
+                    </td>
+                    <td
+                      role="cell"
+                      data-label="État"
+                      // Like the dashed border of the bracket; the words say why
+                      className={
+                        needsAttention(match)
+                          ? "font-bold text-loss"
+                          : undefined
+                      }
+                    >
+                      {matchStatus(match)}
+                    </td>
+                    <td role="cell" data-label="Suite">
+                      {nextText(bracket, round, match.position)}
+                    </td>
+                    {renderPrediction && (
+                      <td role="cell" data-label="Mon pronostic">
+                        {renderPrediction(match)}
+                      </td>
+                    )}
+                    {onOpen && (
+                      <td role="cell" data-label="Action">
+                        <MatchAction
+                          match={match}
+                          onOpen={onOpen}
+                          disabled={busy}
+                        />
+                      </td>
+                    )}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </section>
+      ))}
     </div>
   );
 }

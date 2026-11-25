@@ -82,3 +82,38 @@ export function championOf(bracket: Bracket): string | null {
   if (final?.state !== "decided") return null;
   return final.slots.find((slot) => slot.winner)?.team?.name ?? null;
 }
+
+// Single elimination: matches 1 and 2 of a round feed match 1 of the next,
+// matches 3 and 4 feed match 2, and so on
+
+// Where the winner of a match goes; null for the final
+export function nextMatch(
+  bracket: Bracket,
+  round: number,
+  position: number,
+): BracketMatch | null {
+  const next = bracket.rounds.find((r) => r.round === round + 1);
+  return (
+    next?.matches.find((m) => m.position === Math.ceil(position / 2)) ?? null
+  );
+}
+
+// The match whose winner takes a slot; null in the first round
+export function feederMatch(
+  bracket: Bracket,
+  round: number,
+  position: number,
+  slot: number,
+): BracketMatch | null {
+  const previous = bracket.rounds.find((r) => r.round === round - 1);
+  const feeder = 2 * (position - 1) + slot;
+  return previous?.matches.find((m) => m.position === feeder) ?? null;
+}
+
+// The path of the bracket in words: "Le vainqueur joue Match 5"
+export function nextText(bracket: Bracket, round: number, position: number) {
+  const next = nextMatch(bracket, round, position);
+  return next
+    ? `Le vainqueur joue ${next.label}`
+    : "Le vainqueur remporte le tournoi";
+}
