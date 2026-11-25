@@ -8,6 +8,7 @@ import type { Bracket, BracketMatch, Tournament } from "@/lib/api/models";
 import { explainMessage } from "@/lib/forms/explain";
 import { routes } from "@/lib/routes";
 import { Icon } from "@/components/brand/icon";
+import { useToast } from "@/components/toast/toast-provider";
 import { StatusBadge } from "@/components/tournament-status";
 import {
   announceResult,
@@ -35,7 +36,7 @@ export function ResultsBoard({
   const returnTo = useRef<string | null>(null);
   const [loadError, setLoadError] = useState("");
   // Only set after a save: loading or switching views says nothing
-  const [announcement, setAnnouncement] = useState("");
+  const toast = useToast();
 
   useEffect(() => {
     Promise.all([
@@ -75,7 +76,9 @@ export function ResultsBoard({
   async function saved(next: Bracket) {
     const matchId = open!.id;
     setBracket(next);
-    setAnnouncement(announceResult(next, matchId));
+    // One polite sentence per save: where the winner goes, and which
+    // matches now need a correction (ticket #27)
+    toast.success(announceResult(next, matchId));
     close();
     // Visitors see the result at once; a failure only delays it until the
     // cache expires, so it is not shown
@@ -119,9 +122,6 @@ export function ResultsBoard({
       </header>
 
       {/* Polite and replaced at each save, never appended */}
-      <p role="status" className="sr-only">
-        {announcement}
-      </p>
 
       {toFix.length > 0 && (
         <p className="oc-card flex items-start gap-2 border-2 border-dashed border-loss font-bold text-loss">

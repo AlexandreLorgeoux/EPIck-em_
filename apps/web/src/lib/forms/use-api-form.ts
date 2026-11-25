@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useState, type FormEvent } from "react";
+import { useToast } from "@/components/toast/toast-provider";
 import { isApiError } from "@/lib/api/errors";
 import { explainFieldError, explainMessage } from "./explain";
 
@@ -10,15 +11,21 @@ export type FormValues = Record<string, string>;
  * Submits a form to the API and turns its errors into French messages:
  * per field when the API names one of the form's fields, for the whole
  * form otherwise. After an error, focus moves to the first field to fix.
+ * Every submit ends with a toast: the message the action returns on
+ * success, the API's error otherwise.
  *
  *   const form = useApiForm({ name: "Nom", tag: "Tag" });
- *   <form id={form.id} onSubmit={form.onSubmit(async (values) => …)}>
+ *   <form id={form.id} onSubmit={form.onSubmit(async (values) => {
+ *     await api.post("/teams", values);
+ *     return "Équipe créée.";
+ *   })}>
  */
 export function useApiForm(labels: Record<string, string>) {
   const id = useId();
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState("");
   const [pending, setPending] = useState(false);
+  const toast = useToast();
 
   useEffect(() => {
     const invalid = document
@@ -32,7 +39,7 @@ export function useApiForm(labels: Record<string, string>) {
   }, [id, fieldErrors]);
 
   const onSubmit =
-    (action: (values: FormValues) => Promise<void>) =>
+    (action: (values: FormValues) => Promise<string | void>) =>
     async (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
       const values: FormValues = {};
@@ -43,8 +50,13 @@ export function useApiForm(labels: Record<string, string>) {
       setFieldErrors({});
       setFormError("");
       try {
-        await action(values);
+        const done = await action(values);
+        if (done) toast.success(done);
       } catch (caught) {
+        toast.apiError(
+          caught,
+          "L'enregistrement a échoué. Réessaie dans un instant.",
+        );
         if (!isApiError(caught)) {
           setFormError("L'enregistrement a échoué. Réessaie dans un instant.");
           return;

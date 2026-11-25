@@ -13,6 +13,7 @@ import {
 } from "@/lib/auth/auth-provider";
 import { fakeApi, signedOut, user } from "@/test/fake-api";
 import { LoginForm } from "./login-form";
+import { toastMessages, withToasts } from "@/test/toasts";
 
 const signedOutApi = (login: [number, unknown]) =>
   fakeApi({
@@ -31,10 +32,12 @@ function SignedInAs() {
 
 function renderLogin() {
   render(
-    <AuthProvider>
-      <LoginForm />
-      <SignedInAs />
-    </AuthProvider>,
+    withToasts(
+      <AuthProvider>
+        <LoginForm />
+        <SignedInAs />
+      </AuthProvider>,
+    ),
   );
   return userEvent.setup();
 }
@@ -79,10 +82,18 @@ describe("LoginForm", () => {
 
     await signIn(ui, "zywoo@example.test", "wrong password");
 
-    expect(await screen.findByRole("alert")).toHaveProperty(
-      "textContent",
-      "E-mail ou mot de passe incorrect. Vérifie-les et réessaie.",
+    // Said by a toast, and kept under the form
+    await waitFor(() =>
+      expect(toastMessages("error")).toEqual([
+        "E-mail ou mot de passe incorrect. Vérifie-les et réessaie.",
+      ]),
     );
+    expect(
+      screen.getByText(
+        "E-mail ou mot de passe incorrect. Vérifie-les et réessaie.",
+        { selector: "form span" },
+      ),
+    ).toBeTruthy();
     expect(mockRouter.replace).not.toHaveBeenCalled();
   });
 

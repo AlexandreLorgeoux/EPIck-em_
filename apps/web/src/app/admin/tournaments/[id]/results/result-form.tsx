@@ -174,7 +174,9 @@ export function ResultForm({
           </div>
         )}
 
-        {form.formError && <ErrorMessage>{form.formError}</ErrorMessage>}
+        {form.formError && (
+          <ErrorMessage announce={false}>{form.formError}</ErrorMessage>
+        )}
 
         <div className="flex flex-wrap gap-3">
           <button

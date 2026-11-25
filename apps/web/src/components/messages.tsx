@@ -17,10 +17,18 @@ export function FieldError({
   );
 }
 
-// An error about the whole screen or form, read out as soon as it shows
-export function ErrorMessage({ children }: { children: ReactNode }) {
+// An error about the whole screen or form, read out as soon as it shows.
+// announce={false} when a toast already says it (form submissions), so a
+// screen reader does not hear it twice.
+export function ErrorMessage({
+  children,
+  announce = true,
+}: {
+  children: ReactNode;
+  announce?: boolean;
+}) {
   return (
-    <p role="alert" className="oc-field__error">
+    <p role={announce ? "alert" : undefined} className="oc-field__error">
       <Icon name="close" />
       <span>{children}</span>
     </p>

@@ -13,6 +13,7 @@ import type {
 import { expectNoAxeViolations } from "@/test/axe";
 import { fakeApi } from "@/test/fake-api";
 import { ResultsBoard } from "./results-board";
+import { toastMessages, withToasts } from "@/test/toasts";
 
 const tournament: Tournament = {
   id: "t1",
@@ -94,7 +95,9 @@ function setup(bracket: Bracket = start) {
     "GET /tournaments/t1/bracket": [200, bracket],
   });
   const refresh = jest.fn<(slug: string) => Promise<void>>(async () => {});
-  const view = render(<ResultsBoard id="t1" onResultSaved={refresh} />);
+  const view = render(
+    withToasts(<ResultsBoard id="t1" onResultSaved={refresh} />),
+  );
   return { fake, refresh, ui: userEvent.setup(), ...view };
 }
 
@@ -174,9 +177,9 @@ describe("ResultsBoard", () => {
     );
 
     await waitFor(() =>
-      expect(screen.getByRole("status").textContent).toBe(
+      expect(toastMessages("polite")).toEqual([
         "Alpha gagne Match 1 et passe en finale.",
-      ),
+      ]),
     );
     expect(
       fake.calls.find((c) => c.route === "POST /matches/m1/result")?.body,
@@ -235,9 +238,9 @@ describe("ResultsBoard", () => {
     );
 
     await waitFor(() =>
-      expect(screen.getByRole("status").textContent).toBe(
+      expect(toastMessages("polite")).toEqual([
         "Delta gagne Match 1 et passe en finale.",
-      ),
+      ]),
     );
     expect(fake.calls.at(-2)?.body).toEqual({
       scores: [1, 3],
@@ -283,7 +286,7 @@ describe("ResultsBoard", () => {
       "Un match ne peut pas finir à égalité : saisis le score qui a départagé les équipes.",
     );
     // Nothing announced until a result is saved
-    expect(screen.getByRole("status").textContent).toBe("");
+    expect(toastMessages("polite")).toEqual([]);
     expect(refresh).not.toHaveBeenCalled();
   });
 
@@ -310,9 +313,9 @@ describe("ResultsBoard", () => {
     );
 
     await waitFor(() =>
-      expect(screen.getByRole("status").textContent).toBe(
+      expect(toastMessages("polite")).toEqual([
         "Alpha gagne Match 1 et passe en finale. Match 3 est à corriger : ses équipes ont changé.",
-      ),
+      ]),
     );
     expect(
       screen.getByText(/Match 3 est à corriger : un résultat précédent/),

@@ -13,6 +13,7 @@ import { explainMessage } from "@/lib/forms/explain";
 import { routes } from "@/lib/routes";
 import { TeamForm } from "../team-form";
 import { ErrorMessage } from "@/components/messages";
+import { useToast } from "@/components/toast/toast-provider";
 
 const messageOf = (caught: unknown) =>
   isApiError(caught)
@@ -25,8 +26,7 @@ export function TeamEditor({ id }: { id: string }) {
   const [team, setTeam] = useState<Team | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
   const [loadError, setLoadError] = useState("");
-  const [error, setError] = useState("");
-  const [notice, setNotice] = useState("");
+  const toast = useToast();
   const [pending, setPending] = useState(false);
   const ids = {
     player: useId(),
@@ -44,14 +44,13 @@ export function TeamEditor({ id }: { id: string }) {
       .catch((caught: unknown) => setLoadError(messageOf(caught)));
   }, [id]);
 
-  // Runs one change, shows its error, and says what happened on success
+  // Runs one change, and says in a toast what happened or what went wrong
   async function run(action: () => Promise<string>) {
     setPending(true);
-    setError("");
     try {
-      setNotice(await action());
+      toast.success(await action());
     } catch (caught) {
-      setError(messageOf(caught));
+      toast.apiError(caught);
     } finally {
       setPending(false);
     }
@@ -137,11 +136,6 @@ export function TeamEditor({ id }: { id: string }) {
         {team.tag && <span className="font-normal"> [{team.tag}]</span>}
       </h1>
 
-      <p role="status" className="sr-only">
-        {notice}
-      </p>
-      {error && <ErrorMessage>{error}</ErrorMessage>}
-
       <section
         aria-labelledby="identity-heading"
         className="flex flex-col gap-4"
@@ -161,8 +155,7 @@ export function TeamEditor({ id }: { id: string }) {
                 tag: values.tag.trim() || null,
               }),
             );
-            setError("");
-            setNotice("Nom et tag enregistrés.");
+            return "Nom et tag enregistrés.";
           }}
         />
       </section>

@@ -24,6 +24,7 @@ export function NewTeam() {
           });
           // Next step: choose its players
           router.push(routes.admin.team(team.id));
+          return `Équipe ${values.name.trim()} créée : ajoute maintenant ses joueurs.`;
         }}
       />
     </div>
