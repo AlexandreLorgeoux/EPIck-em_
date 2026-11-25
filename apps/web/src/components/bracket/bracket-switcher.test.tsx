@@ -20,6 +20,7 @@ const bracket: Bracket = {
           position: 1,
           state: "decided",
           hasResult: true,
+          predictionLock: "played",
           slots: [
             {
               position: 1,

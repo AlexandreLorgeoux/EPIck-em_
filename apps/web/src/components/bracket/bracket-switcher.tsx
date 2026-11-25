@@ -21,11 +21,14 @@ export function BracketSwitcher({
   bracket,
   onOpen,
   busy,
+  renderPrediction,
   children,
 }: {
   bracket: Bracket;
   onOpen?: (match: BracketMatch, button: HTMLButtonElement) => void;
   busy?: boolean;
+  // The visitor's prediction on a match, shown in both views
+  renderPrediction?: (match: BracketMatch) => ReactNode;
   children?: ReactNode;
 }) {
   const [view, setView] = useState<View>("bracket");
@@ -49,7 +52,12 @@ export function BracketSwitcher({
         ))}
       </div>
       {children}
-      <Matches bracket={bracket} onOpen={onOpen} busy={busy} />
+      <Matches
+        bracket={bracket}
+        onOpen={onOpen}
+        busy={busy}
+        renderPrediction={renderPrediction}
+      />
     </>
   );
 }

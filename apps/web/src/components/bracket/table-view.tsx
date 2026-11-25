@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { Bracket, BracketMatch } from "@/lib/api/models";
 import { matchStatus, roundName } from "./bracket-text";
 import { MatchAction, TeamLabel, scoreText } from "./match-parts";
@@ -8,11 +9,13 @@ export function TableView({
   bracket,
   onOpen,
   busy,
+  renderPrediction,
 }: {
   bracket: Bracket;
   // Opens the result form of a match; left out, the view is read-only
   onOpen?: (match: BracketMatch, button: HTMLButtonElement) => void;
   busy?: boolean;
+  renderPrediction?: (match: BracketMatch) => ReactNode;
 }) {
   const rounds = bracket.rounds.length;
   return (
@@ -20,7 +23,8 @@ export function TableView({
       role="region"
       aria-label="Tableau des matchs"
       tabIndex={0}
-      className="overflow-x-auto"
+      // relative: keeps hidden labels inside the scrolled area
+      className="relative overflow-x-auto"
     >
       <table className="oc-table">
         <caption className="sr-only">
@@ -35,6 +39,7 @@ export function TableView({
                 </th>
               ),
             )}
+            {renderPrediction && <th scope="col">Mon pronostic</th>}
             {onOpen && (
               <th scope="col">
                 <span className="sr-only">Action</span>
@@ -63,6 +68,9 @@ export function TableView({
                     <TeamLabel slot={second} decided={decided} />
                   </td>
                   <td>{matchStatus(match)}</td>
+                  {renderPrediction && (
+                    <td className="min-w-64">{renderPrediction(match)}</td>
+                  )}
                   {onOpen && (
                     <td>
                       <MatchAction
