@@ -61,7 +61,7 @@ const bracketOf = (semis: BracketMatch[], final: BracketMatch): Bracket => ({
   stage: { id: "s1", name: "Bracket", format: "single_elim", seeding: "auto" },
   rounds: [
     { round: 1, matches: semis },
-    { round: 2, matches: [final] },
+    { round: 2, matches: [{ ...final, position: 1 }] },
   ],
 });
 
@@ -120,7 +120,9 @@ describe("ResultsBoard", () => {
     expect(
       within(card("Match 3")).getByText("En attente des équipes"),
     ).toBeTruthy();
-    expect(within(card("Match 3")).getByText("À déterminer")).toBeTruthy();
+    expect(
+      within(card("Match 3")).getByText("Vainqueur de Match 2"),
+    ).toBeTruthy();
   });
 
   it("shows the same matches as a table", async () => {
@@ -129,28 +131,39 @@ describe("ResultsBoard", () => {
     await ui.click(table);
     expect(table.getAttribute("aria-pressed")).toBe("true");
 
-    const rows = within(screen.getByRole("table")).getAllByRole("row").slice(1);
-    expect(
-      rows.map((row) =>
-        [...row.children].slice(0, 6).map((cell) => cell.textContent),
-      ),
-    ).toEqual([
+    const rows = (round: string) =>
+      within(screen.getByRole("table", { name: round }))
+        .getAllByRole("row")
+        .slice(1)
+        .map((row) =>
+          [...row.children].slice(0, 6).map((cell) => cell.textContent),
+        );
+    expect(rows("Demi-finales")).toEqual([
       [
-        "Demi-finales",
         "Match 1",
         "Alpha Vainqueur",
         "3 – 1",
         "Delta Éliminé",
         "Terminé",
+        "Le vainqueur joue Match 3",
       ],
-      ["Demi-finales", "Match 2", "Bravo", "—", "Charlie", "À jouer"],
       [
-        "Finale",
+        "Match 2",
+        "Bravo",
+        "—",
+        "Charlie",
+        "À jouer",
+        "Le vainqueur joue Match 3",
+      ],
+    ]);
+    expect(rows("Finale")).toEqual([
+      [
         "Match 3",
         "Alpha",
         "—",
-        "À déterminer",
+        "Vainqueur de Match 2",
         "En attente des équipes",
+        "Le vainqueur remporte le tournoi",
       ],
     ]);
   });

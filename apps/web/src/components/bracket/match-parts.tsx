@@ -8,13 +8,21 @@ import { isPlayable } from "./bracket-text";
 export function TeamLabel({
   slot,
   decided,
+  feeder,
 }: {
   slot: BracketSlot;
   decided: boolean;
+  // Label of the match whose winner comes here
+  feeder?: string;
 }) {
   if (slot.state === "bye")
     return <span className="text-ink-soft">Exempt</span>;
-  if (!slot.team) return <span className="text-ink-soft">À déterminer</span>;
+  if (!slot.team)
+    return (
+      <span className="text-ink-soft">
+        {feeder ? `Vainqueur de ${feeder}` : "À déterminer"}
+      </span>
+    );
   return (
     <span className="inline-flex flex-wrap items-center gap-x-2 gap-y-1">
       <span className={slot.winner ? "font-bold" : undefined}>
