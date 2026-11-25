@@ -8,6 +8,7 @@ import type { AuthUser } from '../auth/auth-user.js';
 import { fieldException } from '../common/validation-errors.js';
 import { matchScore, type RoundScores } from '../engine/result.js';
 import { planSingleElimination } from '../engine/single-elimination.js';
+import { predictionLock } from '../predictions/prediction-lock.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { BracketRecomputeService } from './bracket-recompute.service.js';
 import { GenerateBracketDto } from './dto/generate-bracket.dto.js';
@@ -114,6 +115,7 @@ export class BracketService {
         matches: {
           orderBy: [{ bracketRound: 'asc' }, { position: 'asc' }],
           include: {
+            _count: { select: { results: true } },
             outcome: {
               include: {
                 result: {
@@ -151,6 +153,7 @@ export class BracketService {
       throw new NotFoundException('This tournament has no bracket yet');
     }
 
+    const now = new Date();
     const rounds = new Map<number, unknown[]>();
     for (const match of stage.matches) {
       const winner = match.outcome?.winnerRegistrationId ?? null;
@@ -175,6 +178,15 @@ export class BracketService {
         state: match.outcome?.state ?? 'pending',
         // A bye is decided without a result: only played matches have one
         hasResult: match.outcome?.resultId != null,
+        // Why the match takes no prediction (server clock), null while open
+        predictionLock: predictionLock(
+          {
+            scheduledAt: match.scheduledAt,
+            played: match._count.results > 0,
+            slots: match.slots.map((s) => s.assignment?.state ?? 'open'),
+          },
+          now,
+        ),
         slots: match.slots.map((slot) => {
           const registration = slot.assignment?.registration;
           return {

@@ -282,7 +282,7 @@ The best seeds meet as late as possible (1 plays 8, 4 plays 5...), and byes go t
 
 **Corrections** (ticket #27) use the same endpoint with a `reason`, required once the match has a result. The new row is version n+1, with `supersedes_id` pointing to the previous one, which stays: these tables are append-only.
 
-When a correction changes who plays a later match that already has a result, that result names teams that no longer play it. Its `match_outcome` becomes `stale` (section 6.4 of the data model): nobody goes through and the tournament is not finished until an admin corrects that match too. `GET /tournaments/:id/bracket` gives each match its `state` and `hasResult`.
+When a correction changes who plays a later match that already has a result, that result names teams that no longer play it. Its `match_outcome` becomes `stale` (section 6.4 of the data model): nobody goes through and the tournament is not finished until an admin corrects that match too. `GET /tournaments/:id/bracket` gives each match its `state`, `hasResult` and `predictionLock`: why it takes no prediction (`bye`, `teams-unknown`, `started` or `played`), null while it is open.
 
 A PostgreSQL advisory lock on the tournament serializes these writes: two results entered at the same time for one match give one `201`, and one `400` asking for a reason, since the match then has a result.
 
