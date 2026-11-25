@@ -273,6 +273,34 @@ describe('Predictions API (e2e)', () => {
       expect(list.body[0].locked).toBe(true);
     });
 
+    it('says in the bracket why each match takes no prediction', async () => {
+      const { id, matchOf } = await running(3);
+      const locks = async () =>
+        (
+          (
+            await request(server())
+              .get(`/tournaments/${id}/bracket`)
+              .expect(200)
+          ).body as {
+            rounds: { matches: { predictionLock: string | null }[] }[];
+          }
+        ).rounds.flatMap((r) => r.matches.map((m) => m.predictionLock));
+      // Match 1 is a bye, Match 2 is open, the final waits for its winner
+      expect(await locks()).toEqual(['bye', null, 'teams-unknown']);
+
+      await prisma.match.update({
+        where: { id: matchOf(1, 2).id },
+        data: { scheduledAt: new Date(Date.now() - 1000) },
+      });
+      expect(await locks()).toEqual(['bye', 'started', 'teams-unknown']);
+
+      await as(admin)
+        .post(`/matches/${matchOf(1, 2).id}/result`)
+        .send({ scores: [2, 0], winnerSlot: 1 })
+        .expect(201);
+      expect(await locks()).toEqual(['bye', 'played', null]);
+    });
+
     it('refuses any change once the match has a result', async () => {
       const { matchOf } = await running(2);
       const match = matchOf(1, 1);
