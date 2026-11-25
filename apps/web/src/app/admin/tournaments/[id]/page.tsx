@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { refreshPublicTournament } from "@/lib/api/refresh-public";
+import { ScoringForm } from "./scoring-form";
 import { TournamentSetup } from "./tournament-setup";
 
 export const metadata: Metadata = { title: "Tournoi · Administration" };
@@ -9,7 +10,11 @@ export const metadata: Metadata = { title: "Tournoi · Administration" };
 // of the page can still be prerendered (Cache Components)
 async function Setup({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  return <TournamentSetup id={id} onStarted={refreshPublicTournament} />;
+  return (
+    <TournamentSetup id={id} onStarted={refreshPublicTournament}>
+      <ScoringForm tournamentId={id} />
+    </TournamentSetup>
+  );
 }
 
 export default function AdminTournamentPage({
