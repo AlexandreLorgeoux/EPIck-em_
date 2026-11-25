@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Archivo, Atkinson_Hyperlegible } from "next/font/google";
 import "./globals.css";
+import { ToastProvider } from "@/components/toast/toast-provider";
 import { AuthProvider } from "@/lib/auth/auth-provider";
 
 // The two fonts of the charter, served by the site itself (next/font):
@@ -28,7 +29,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="fr" className={`${archivo.variable} ${atkinson.variable}`}>
       <body>
-        <AuthProvider>{children}</AuthProvider>
+        <ToastProvider>
+          <AuthProvider>{children}</AuthProvider>
+        </ToastProvider>
       </body>
     </html>
   );
