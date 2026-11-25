@@ -1,6 +1,7 @@
 import { describe, expect, it } from "@jest/globals";
 import type { Bracket, BracketMatch, BracketSlot } from "@/lib/api/models";
 import {
+  announceChanges,
   announceResult,
   championOf,
   matchStatus,
@@ -180,5 +181,45 @@ describe("the path of the bracket", () => {
     expect(from(2, 1)).toEqual(["Match 1", "Match 2"]);
     expect(from(2, 2)).toEqual(["Match 3", "Match 4"]);
     expect(from(3, 1)).toEqual(["Match 5", "Match 6"]);
+  });
+});
+
+describe("announceChanges", () => {
+  const played = (label: string, position: number, done: boolean) => ({
+    ...match(
+      label,
+      [
+        slot("Alpha", { winner: done, score: done ? 2 : null }),
+        slot("Bravo", { position: 2, score: done ? 0 : null }),
+      ],
+      done ? { state: "decided", hasResult: true } : {},
+    ),
+    id: label,
+    position,
+  });
+  const state = (first: boolean, second: boolean): Bracket => ({
+    stage: {
+      id: "s1",
+      name: "Bracket",
+      format: "single_elim",
+      seeding: "auto",
+    },
+    rounds: [
+      {
+        round: 1,
+        matches: [played("Match 1", 1, first), played("Match 2", 2, second)],
+      },
+      { round: 2, matches: [played("Match 3", 1, false)] },
+    ],
+  });
+
+  it("says one result, sums up several, and is silent without any", () => {
+    expect(announceChanges(state(false, false), state(true, false))).toBe(
+      "Alpha gagne Match 1 et passe en finale.",
+    );
+    expect(announceChanges(state(false, false), state(true, true))).toBe(
+      "2 résultats mis à jour : Match 1, Match 2.",
+    );
+    expect(announceChanges(state(true, true), state(true, true))).toBe("");
   });
 });
