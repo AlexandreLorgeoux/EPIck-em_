@@ -126,3 +126,13 @@ export interface Prediction {
   points: number;
   locked: boolean;
 }
+
+// GET and PUT /tournaments/:id/scoring
+export interface Scoring {
+  pointsCorrectPick: number;
+  exactScoreBonus: number;
+  roundIncrement: number;
+  // Nobody set the points of this tournament yet
+  isDefault: boolean;
+  updatedAt: string | null;
+}

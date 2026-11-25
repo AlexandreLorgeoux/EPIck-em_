@@ -26,6 +26,18 @@ function lengthAdvice(length: number | undefined, min: number, max: number) {
   return "";
 }
 
+// What to type instead of a wrong number of points
+function pointsAdvice(label: string, value: string | undefined) {
+  const expected = `«${label}» doit être un nombre entier de 0 à 100.`;
+  const number = Number(value);
+  if (!value?.trim() || Number.isNaN(number)) {
+    return `${expected} Saisis un nombre, par exemple 3.`;
+  }
+  if (number < 0) return `${expected} Remplace ${value} par 0 ou plus.`;
+  if (number > 100) return `${expected} Remplace ${value} par 100 ou moins.`;
+  return `${expected} Remplace ${value.replace(".", ",")} par ${Math.floor(number)} ou ${Math.ceil(number)}.`;
+}
+
 const fieldRules: {
   pattern: RegExp;
   explain: (match: RegExpMatchArray, label: string, value?: string) => string;
@@ -55,6 +67,10 @@ const fieldRules: {
     pattern: /^each score must be (a whole number|0 or more)/,
     explain: () =>
       "Les scores doivent être des nombres entiers, 0 ou plus : corrige le score de chaque équipe.",
+  },
+  {
+    pattern: /^\w+ must be (a whole number of points|0 or more|100 or less)$/,
+    explain: (_, label, value) => pointsAdvice(label, value),
   },
   {
     pattern: /^(each score must be 1000 or less|score must be two scores)/,

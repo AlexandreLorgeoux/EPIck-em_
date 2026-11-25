@@ -1,7 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { api } from "@/lib/api/client";
 import { isApiError } from "@/lib/api/errors";
 import { explainMessage } from "@/lib/forms/explain";
@@ -28,10 +35,13 @@ const messageOf = (caught: unknown) =>
 export function TournamentSetup({
   id,
   onStarted,
+  children,
 }: {
   id: string;
   // Refreshes the public pages, where the tournament now appears
   onStarted?: (slug: string) => Promise<void>;
+  // Other settings, before the bracket that starts the tournament
+  children?: ReactNode;
 }) {
   const [tournament, setTournament] = useState<Tournament | null>(null);
   const [teams, setTeams] = useState<TournamentTeam[]>([]);
@@ -347,6 +357,8 @@ export function TournamentSetup({
           </button>
         )}
       </section>
+
+      {children}
 
       {draft && (
         <section
